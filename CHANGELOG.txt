@@ -1,3 +1,10 @@
+Version 1.1.6-h4k.1
+Release Date: 14 October 2026
+- Hotel Hideaway fork as a Unity package (com.hotelhideaway.svgimporter); upstream .meta GUIDs unchanged
+- Added, assembly definitions SVGImporter and SvgImporter.Editor
+- Fixed, SVGImage mesh handling for UGUI
+- Updated, shaders and APIs for Unity 6 and URP; importer and editor fixes
+- Removed, examples, example projects and Git LFS
 
 - What happened to support? 
 https://forum.unity3d.com/threads/svg-importer-vector-graphics-unity-ui-supported-released.323618/
