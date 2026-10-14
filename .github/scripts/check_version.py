@@ -1,7 +1,8 @@
 """Pull request check: a change to the package needs a new version and a changelog entry.
 
 Usage: check_version.py <base sha>
-Docs-only changes (README, CHANGELOG, Documentation~) and CI files under .github/ need no new version.
+Docs-only changes (README, CHANGELOG, Documentation~), CI files under .github/ and root dotfiles
+(.gitattributes, .gitignore; Unity ignores them) need no new version.
 """
 import json
 import subprocess
@@ -17,7 +18,7 @@ def git(*args):
 
 
 def needs_version(path):
-    return not (path.startswith(".github/") or path in DOCS or path.startswith("Documentation~/"))
+    return not (path.startswith(".") or path in DOCS or path.startswith("Documentation~/"))
 
 
 def main(base):
