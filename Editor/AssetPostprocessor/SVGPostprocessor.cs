@@ -1,6 +1,4 @@
-// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
-// This code can only be used under the standard Unity Asset Store End User License Agreement
-// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
+
 
 using UnityEngine;
 using UnityEditor;
@@ -11,6 +9,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+
+#pragma warning disable 0618
 
 namespace SVGImporter 
 {
@@ -69,6 +69,11 @@ namespace SVGImporter
         {
             return asset.EndsWith(extension, System.StringComparison.OrdinalIgnoreCase);
         }
+
+        private static bool IsProjectAssetPath(string asset)
+        {
+            return asset.StartsWith("Assets/", StringComparison.OrdinalIgnoreCase);
+        }
         
         public static string ConvertToInternalPath(string asset)
         {
@@ -107,6 +112,9 @@ namespace SVGImporter
             {
                 if(HasExtension(asset, svgExtension))
                 {
+                    if(!IsProjectAssetPath(asset))
+                        continue;
+
                     importSVGAssets.Add(asset);
                 } else if(HasExtension(asset, assetExtension))
                 {
@@ -122,8 +130,11 @@ namespace SVGImporter
             reImportTotalAssets = reimportSVGAssets.Count;
 
 			if(importTotalAssets + reImportTotalAssets > 0)
-			{				
-				AssetDatabase.StartAssetEditing();
+			{			
+// Unity 6000 introduces a problem importing SVGs                
+#if !UNITY_6000_0_OR_NEWER
+                AssetDatabase.StartAssetEditing();
+#endif
 			} else {
 				EditorUtility.ClearProgressBar();
 				importSVGAssets.Clear();
@@ -178,7 +189,9 @@ namespace SVGImporter
             reimportSVGAssets = null;
 
 			AssetDatabase.SaveAssets();
+#if !UNITY_6000_0_OR_NEWER            
 			AssetDatabase.StopAssetEditing();
+#endif
 			AssetDatabase.Refresh();
 			Canvas.ForceUpdateCanvases();
 			SceneView.RepaintAll();
@@ -193,6 +206,12 @@ namespace SVGImporter
         // Imports my asset from the file
         static void ImportVGAsset(string asset)
         {
+            if(!IsProjectAssetPath(asset))
+            {
+                Debug.LogWarning("Skipping SVG import for non-project asset: " + asset);
+                return;
+            }
+
             string directoryName = Path.GetDirectoryName(asset);
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(asset);
             string outputFileName = directoryName+"/"+fileNameWithoutExtension+".asset";
@@ -221,7 +240,7 @@ namespace SVGImporter
 
         protected static void InitDefaultValues(SVGAsset asset)
         {
-            FieldInfo _editor_format = typeof(SVGAsset).GetField("_format", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo _editor_format = typeof(SVGAsset).GetField("_format", BindingFlags.NonPublic | BindingFlags.Instance);            
             _editor_format.SetValue(asset, SVGImporterEditor.settings.defaultSVGFormat);
 
             FieldInfo _editor_useGradients = typeof(SVGAsset).GetField("_useGradients", BindingFlags.NonPublic | BindingFlags.Instance);

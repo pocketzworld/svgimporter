@@ -1,10 +1,10 @@
-// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
-// This code can only be used under the standard Unity Asset Store End User License Agreement
-// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
+
 
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
+
+#pragma warning disable 0649
 
 namespace SVGImporter.Rendering
 {
@@ -267,7 +267,7 @@ namespace SVGImporter.Rendering
                     }
                 }
 
-                if (type == EventType.mouseDrag)
+                if (type == EventType.MouseDrag)
                 {
                     OnMouseDrag(vrTrs);
                     GUI.changed = true;
@@ -275,7 +275,7 @@ namespace SVGImporter.Rendering
                 }
 
                 // Cancel Operation
-                if (Event.current.type == EventType.keyDown && Event.current.keyCode == KeyCode.Escape)
+                if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
                 {
                     vrTrs.SetTransform(origVrTransform);
                     Reset();
@@ -285,7 +285,7 @@ namespace SVGImporter.Rendering
                 }
             }
 
-            if (type == EventType.repaint)
+            if (type == EventType.Repaint)
             {
                 RenderTransformationGizmos(vrTrs);
             }
@@ -519,6 +519,7 @@ namespace SVGImporter.Rendering
             }
         }
 
+#pragma warning disable 0618
         protected static void RenderTransformationGizmos(SVGTransform2D selectionTransform)
         {
             Handles.color = COLOR_SELECTED;
@@ -595,7 +596,9 @@ namespace SVGImporter.Rendering
             Vector2 horizontal = (p2p0 - p1p3).normalized;
             Vector2 vertical = (p3p2 - p0p1).normalized;
 
-            Handles.DotCap(0, Vector2.Lerp(p2p0, p1p3, 0.5f), capRotation, transformCapSize);
+            // var lerp = Vector2.Lerp(p2p0, p1p3, 0.5f);
+            // Handles.DotCap(0, Vector2.Lerp(p2p0, p1p3, 0.5f), capRotation, transformCapSize);
+            Handles.DotHandleCap(0, Vector2.Lerp(p2p0, p1p3, 0.5f), capRotation, transformCapSize, EventType.Repaint);
             
             // p0
             SVGGizmos.ShowScaleCursor(p0, p3 - p0, transformCursorRadius);
@@ -604,7 +607,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p0, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p0, capRotation, transformCapSize, EventType.Repaint);
 
             // p1
             SVGGizmos.ShowScaleCursor(p1, p2 - p1, transformCursorRadius);
@@ -613,7 +616,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p1, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p1, capRotation, transformCapSize, EventType.Repaint);
             
             // p2
             SVGGizmos.ShowScaleCursor(p2, p1 - p2, transformCursorRadius);
@@ -622,7 +625,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p2, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p2, capRotation, transformCapSize, EventType.Repaint);
             
             // p3
             SVGGizmos.ShowScaleCursor(p3, p0 - p3, transformCursorRadius);
@@ -631,7 +634,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p3, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p3, capRotation, transformCapSize, EventType.Repaint);
             
             // p0-p1
             SVGGizmos.ShowScaleCursor(p0p1, p3p2 - p0p1, transformCursorRadius);
@@ -640,7 +643,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p0p1, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p0p1, capRotation, transformCapSize, EventType.Repaint);
             
             // p2-p0
             SVGGizmos.ShowScaleCursor(p2p0, p1p3 - p2p0, transformCursorRadius);
@@ -649,7 +652,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p2p0, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p2p0, capRotation, transformCapSize, EventType.Repaint);
             
             // p3-p2
             SVGGizmos.ShowScaleCursor(p3p2, p0p1 - p3p2, transformCursorRadius);
@@ -658,7 +661,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p3p2, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p3p2, capRotation, transformCapSize, EventType.Repaint);
             
             // p1-p3
             SVGGizmos.ShowScaleCursor(p1p3, p2p0 - p1p3, transformCursorRadius);
@@ -667,7 +670,7 @@ namespace SVGImporter.Rendering
                 Handles.color = COLOR_HIGHLIGHTED;
             else
                 Handles.color = COLOR_SELECTED;
-            Handles.DotCap(0, p1p3, capRotation, transformCapSize);
+            Handles.DotHandleCap(0, p1p3, capRotation, transformCapSize, EventType.Repaint);
             
             Handles.color = COLOR_SELECTED;
             SVGGizmos.Line(new Vector2[]{p0, p1, p3, p2, p0});
@@ -678,5 +681,6 @@ namespace SVGImporter.Rendering
             Handles.Label(p3, "   p3");
             */
         }
+#pragma warning restore 0618
     }
 }

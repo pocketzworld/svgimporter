@@ -23,7 +23,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("errors")]
         [SerializeField]
-        protected SVGError[] _errors;
+        protected SVGError[] _errors = default;
         public SVGError[] errors
         {
             get {
@@ -36,7 +36,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("svgFile")]
         [SerializeField]
-        protected string _svgFile;
+        protected string _svgFile = default;
         public string svgFile
         {
             get {
@@ -57,7 +57,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("title")]
         [SerializeField]
-        protected string _title;
+        protected string _title = default;
         public string title
         {
             get {
@@ -70,7 +70,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("description")]
         [SerializeField]
-        protected string _description;
+        protected string _description = default;
         public string description
         {
             get {

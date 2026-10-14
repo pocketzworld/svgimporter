@@ -1,6 +1,4 @@
-// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
-// This code can only be used under the standard Unity Asset Store End User License Agreement
-// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
+
 
 using UnityEngine;
 using UnityEditor;
@@ -16,7 +14,9 @@ namespace SVGImporter
 	[CustomEditor(typeof(SVGModifier), true)]
 	[CanEditMultipleObjects]
 	public class SVGModifierEditor : Editor 
-	{		
+	{
+		protected bool selectingLayers;
+
 		SerializedProperty useSelection;
 		SerializedProperty manualUpdate;
 		SVGModifier modifier;
@@ -29,23 +29,22 @@ namespace SVGImporter
 			modifier = (SVGModifier)target;
 			layerList = new SVGLayerList();
 
-			SceneView.onSceneGUIDelegate += this.OnSceneView;
+			SceneView.duringSceneGui += this.OnSceneView;
 			EditorApplication.update += Update;
 		}
 
 		public virtual void OnFocus()
 		{
 			// Remove and re-add the sceneGUI delegate
-			SceneView.onSceneGUIDelegate -= this.OnSceneView;
-			SceneView.onSceneGUIDelegate += this.OnSceneView;
+			SceneView.duringSceneGui -= this.OnSceneView;
+			SceneView.duringSceneGui += this.OnSceneView;
 			EditorApplication.update -= Update;
 			EditorApplication.update += Update;
 		}
 
 		public virtual void OnDisable()
 		{
-            SVGModifier._internal_selectingModifier = null;
-            SceneView.onSceneGUIDelegate -= this.OnSceneView;
+			SceneView.duringSceneGui -= this.OnSceneView;
 			EditorApplication.update -= Update;
 		}
 
@@ -121,15 +120,16 @@ namespace SVGImporter
 
 		public void ManualUpdateGUI()
 		{
-			
+			EditorGUILayout.PropertyField(manualUpdate);
 		}
 
 		public override void OnInspectorGUI ()
 		{
 			serializedObject.Update();
 			EditorGUI.BeginChangeCheck();
-            SelectionGUI();
-            if (EditorGUI.EndChangeCheck())
+			ManualUpdateGUI();
+			SelectionGUI();
+			if(EditorGUI.EndChangeCheck())
 			{
 				serializedObject.ApplyModifiedProperties();
 				SceneView.RepaintAll();
@@ -146,47 +146,18 @@ namespace SVGImporter
 
 		public void SelectionGUI()
 		{
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.BeginVertical();
-            EditorGUILayout.PropertyField(manualUpdate);
-            SVGAsset svgAsset = GetSVGAsset();
+			SVGAsset svgAsset = GetSVGAsset();
 			if(svgAsset == null) return;
 			SVGLayer[] svgLayers = svgAsset.layers;
 			if(svgLayers == null || svgLayers.Length == 0) return;
 			int layersLength = svgLayers.Length;
 
 			EditorGUILayout.PropertyField(useSelection);
-            EditorGUILayout.EndVertical();
-            if (useSelection.boolValue)
+			if(useSelection.boolValue)
 			{
-                GUILayout.BeginVertical();
-                EditorGUILayout.Space();
-                GUILayout.BeginHorizontal();
-
-                bool selectingLayers = SVGModifier._internal_selectingModifier == modifier;
-                Color guiColor = GUI.color;
-                if (selectingLayers)
-                {
-                    GUI.color = Color.red;
-                    if (GUILayout.Button("Select", "Button"))
-                    {                        
-                        SVGModifier._internal_selectingModifier = null;
-                        selectingLayers = false;
-                        SceneView.RepaintAll();
-                    }
-                } else
-                {
-                    GUI.color = Color.white;
-                    if (GUILayout.Button("Select", "Button"))
-                    {
-                        SVGModifier._internal_selectingModifier = modifier;
-                        selectingLayers = true;
-                        SceneView.RepaintAll();
-                    }
-                }
-                GUI.color = guiColor;
-
-                if (GUILayout.Button("Clear"))
+				GUILayout.BeginHorizontal();
+				selectingLayers = GUILayout.Toggle(selectingLayers, "Select", "Button");
+				if(GUILayout.Button("Clear"))
 				{
 					modifier.layerSelection.Clear();
 				}
@@ -200,21 +171,16 @@ namespace SVGImporter
 						modifier.layerSelection.Add(i);
 					}
 				}
-                GUILayout.EndVertical();
-				GUILayout.EndHorizontal();				
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.Space();
+				GUILayout.EndHorizontal();
+				EditorGUILayout.Space();
 
-                if (selectingLayers)
+				if(selectingLayers)
 				{
 					layerList.DoLayout(svgLayers, modifier.layerSelection);
 				}
 
 			} else {
-
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.Space();
-                SVGModifier._internal_selectingModifier = null;
+				selectingLayers = false;
 			}
 		}
 
@@ -310,7 +276,7 @@ namespace SVGImporter
 		void OnSceneView(SceneView sceneView)
 		{
 			lastSceneView = sceneView;
-            if (!useSelection.boolValue) SVGModifier._internal_selectingModifier = null;
+			if(!useSelection.boolValue) selectingLayers = false;
 
 			Rect position = sceneView.position;
 			position = new Rect(0f, 0f, position.size.x, position.size.y);
@@ -319,7 +285,7 @@ namespace SVGImporter
 			Vector2 localMousePosition = modifier.transform.worldToLocalMatrix.MultiplyPoint(GUIPointToWorld(current.mousePosition));
 			int layerIndex;
 
-			if(SVGModifier._internal_selectingModifier == modifier)
+			if(selectingLayers)
 			{
                 SVGAsset svgAsset = GetSVGAsset();
                 
@@ -329,12 +295,12 @@ namespace SVGImporter
 					{
 						switch (current.type)
 						{						
-						case EventType.mouseDown:
+						case EventType.MouseDown:
                                 int controlID = GUIUtility.GetControlID(controlIDHash, FocusType.Passive);
                                 GUIUtility.hotControl = controlID;
                                 clickGUIPosition = current.mousePosition;
 							break;
-						case EventType.mouseUp:
+						case EventType.MouseUp:
 							if((current.mousePosition - clickGUIPosition).sqrMagnitude < 0.1f)
 							{
 								layerIndex = GetHighestLayerAtPoint(svgAsset.layers, localMousePosition);
@@ -369,7 +335,7 @@ namespace SVGImporter
 
 				if (GUI.changed) EditorUtility.SetDirty(target);
 
-				if(current.type == EventType.repaint)
+				if(current.type == EventType.Repaint)
 				{
 					Color handlesColor = Handles.color;
 					Handles.color = new Color(1f, 1f, 1f, 0.5f);

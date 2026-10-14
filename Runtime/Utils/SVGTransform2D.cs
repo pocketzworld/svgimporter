@@ -14,7 +14,7 @@ namespace SVGImporter.Rendering
     public class SVGTransform2D : System.Object, ICloneable {
         
         [SerializeField]
-        protected Vector2 _position;
+        protected Vector2 _position = default;
         [HideInInspector]
         public Vector2 position
         {
@@ -30,7 +30,7 @@ namespace SVGImporter.Rendering
         }
         
         [SerializeField]
-        protected float _rotation;
+        protected float _rotation = default;
         public float rotation
         {
             get {

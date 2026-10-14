@@ -1,5 +1,6 @@
 ﻿
 
+#if UNITY_EDITOR
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -59,9 +60,8 @@ namespace SVGImporter
         }
 
         protected override void PrepareForRendering (SVGLayer[] layers, SVGAsset svgAsset, bool force) 
-        {
-            if (!active) return;
-            if (layers == null) return;
+        {        
+            if(layers == null) return;
             Camera currentCamera = mainCamera;
 
             SVGMatrix scaleMatrix = SVGMatrix.identity;
@@ -77,8 +77,7 @@ namespace SVGImporter
             if(currentCamera.orthographic)
             {
                 tempRadius *= screenSize;
-            } else
-            {
+            } else {
                 float camDistance = Vector3.Distance(transform.position, currentCamera.transform.position);
                 if(camDistance > 0f)
                 {
@@ -91,8 +90,7 @@ namespace SVGImporter
             if(!motionBlur)
             {
                 scaleMatrix = scaleMatrix.Scale(tempRadius);
-            } else
-            {
+            } else {
                 float intensity = tempRadius;
 
                 if(!manualMotionBlur)
@@ -121,7 +119,6 @@ namespace SVGImporter
             rotationMatrix = rotationMatrix.Rotate(-direction);
             SVGMatrix rotationMatrixInverse = SVGMatrix.identity;
             rotationMatrixInverse = rotationMatrixInverse.Rotate(direction);
-            SVGMatrix matrix = rotationMatrixInverse.Multiply(scaleMatrix.Multiply(rotationMatrix));
 
             int totalLayers = layers.Length;
             if(!useSelection)
@@ -137,35 +134,33 @@ namespace SVGImporter
                         int vertexCount = layers[i].shapes[j].vertexCount;
                         for(int k = 0; k < vertexCount; k++)
                         {
-                            Vector2 dir = layers[i].shapes[j].angles[k];                           
-                            dir = matrix.Transform(dir);
+                            Vector2 dir = layers[i].shapes[j].angles[k];
+                            dir = rotationMatrix.Transform(dir);
+                            dir = scaleMatrix.Transform(dir);
+                            dir = rotationMatrixInverse.Transform(dir);
                             layers[i].shapes[j].angles[k] = dir;
                         }
                     }
                 }
-            } else
-            {
-                if (layerSelection.layers != null)
+            } else {
+                for(int i = 0; i < totalLayers; i++)
                 {
-                    int selectionCount = layerSelection.layers.Count;
-                    for (int i = 0; i < selectionCount; i++)
-                    {
-                        int layerIndex = layerSelection.layers[i];
-                        if (layerIndex < 0 || layerIndex >= totalLayers) continue;
-                        if (layers[layerIndex].shapes == null) continue;
-                        int shapesLength = layers[layerIndex].shapes.Length;
-                        for (int j = 0; j < shapesLength; j++)
-                        {
-                            int vertexCount = layers[layerIndex].shapes[j].vertexCount;
-                            if (layers[layerIndex].shapes[j].type != SVGShapeType.ANTIALIASING) continue;
-                            if (layers[layerIndex].shapes[j].angles == null) continue;
+                    if(layers[i].shapes == null) continue;
+                    if(!layerSelection.Contains(i)) continue;
 
-                            for (int k = 0; k < vertexCount; k++)
-                            {
-                                Vector2 dir = layers[layerIndex].shapes[j].angles[k];
-                                dir = matrix.Transform(dir);
-                                layers[layerIndex].shapes[j].angles[k] = dir;
-                            }
+                    int shapesLength = layers[i].shapes.Length;
+                    for(int j = 0; j < shapesLength; j++)
+                    {
+                        if(layers[i].shapes[j].type != SVGShapeType.ANTIALIASING) continue;
+                        if(layers[i].shapes[j].angles == null) continue;
+                        int vertexCount = layers[i].shapes[j].vertexCount;
+                        for(int k = 0; k < vertexCount; k++)
+                        {
+                            Vector2 dir = layers[i].shapes[j].angles[k];
+                            dir = rotationMatrix.Transform(dir);
+                            dir = scaleMatrix.Transform(dir);
+                            dir = rotationMatrixInverse.Transform(dir);
+                            layers[i].shapes[j].angles[k] = dir;
                         }
                     }
                 }
@@ -173,3 +168,4 @@ namespace SVGImporter
         }
     }
 }
+#endif

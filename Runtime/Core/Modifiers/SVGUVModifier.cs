@@ -33,8 +33,6 @@ namespace SVGImporter
 
         protected override void PrepareForRendering (SVGLayer[] layers, SVGAsset svgAsset, bool force) 
         {
-            if (!active) return;
-
             SVGMatrix T = SVGMatrix.identity.Translate(-position);
             SVGMatrix R = SVGMatrix.identity.Rotate(rotation);
             SVGMatrix S = SVGMatrix.identity.Scale(scale);
@@ -85,22 +83,20 @@ namespace SVGImporter
                         }
                     }
                 }
-            } else
-            {
-                if (layerSelection.layers != null)
+            } else {
+                for(int i = 0; i < totalLayers; i++)
                 {
-                    int selectionCount = layerSelection.layers.Count;
-                    for (int i = 0; i < selectionCount; i++)
+                    if(layers[i].shapes == null) continue;
+                    if(!layerSelection.Contains(i)) continue;
+
+                    int shapesLength = layers[i].shapes.Length;
+                    for(int j = 0; j < shapesLength; j++)
                     {
-                        int layerIndex = layerSelection.layers[i];
-                        if (layerIndex < 0 || layerIndex >= totalLayers) continue;
-                        if (layers[layerIndex].shapes == null) continue;
-                        int shapesLength = layers[layerIndex].shapes.Length;
-                        for (int j = 0; j < shapesLength; j++)
+                        int vertexCount = layers[i].shapes[j].vertexCount;
+                        for(int k = 0; k < vertexCount; k++)
                         {
-                            int vertexCount = layers[layerIndex].shapes[j].vertexCount;
-                            layers[layerIndex].shapes[j].fill.fillType = FILL_TYPE.TEXTURE;
-                            layers[layerIndex].shapes[j].fill.transform = tempMatrix;
+                            layers[i].shapes[j].fill.fillType = FILL_TYPE.TEXTURE;
+                            layers[i].shapes[j].fill.transform = tempMatrix;
                         }
                     }
                 }

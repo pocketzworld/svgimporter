@@ -14,7 +14,7 @@ namespace SVGImporter
     {
         [HideInInspector]
         [SerializeField]
-        protected List<int> _layers;
+        protected List<int> _layers = default;
         public List<int> layers
         {
             get {
@@ -72,11 +72,7 @@ namespace SVGImporter
         }
     }
 
-    public abstract class SVGModifier : MonoBehaviour, ISVGModify
-    {
-#if UNITY_EDITOR
-        public static SVGModifier _internal_selectingModifier;
-#endif
+    public abstract class SVGModifier : MonoBehaviour, ISVGModify {
 
         [HideInInspector]
         public bool manualUpdate = false;
@@ -145,20 +141,6 @@ namespace SVGImporter
             svgRenderer.UpdateRenderer();
         }
 
-        public virtual bool active
-        {
-            get
-            {
-#if UNITY_EDITOR
-                if (_internal_selectingModifier != null)
-                {
-                    return false;
-                }
-#endif
-                return enabled;
-            }
-        }
-        
         protected abstract void PrepareForRendering (SVGLayer[] layers, SVGAsset svgAsset, bool force);
     }
 }

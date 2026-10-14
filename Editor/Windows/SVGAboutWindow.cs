@@ -1,6 +1,4 @@
-// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
-// This code can only be used under the standard Unity Asset Store End User License Agreement
-// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
+
 
 using System;
 using UnityEditor;
@@ -145,7 +143,7 @@ namespace SVGImporter
 		static void OnLastRectClick(Action action)
 		{
 			Rect lastRect = GUILayoutUtility.GetLastRect();
-			if(Event.current.type == EventType.mouseDown && lastRect.Contains(Event.current.mousePosition))
+			if(Event.current.type == EventType.MouseDown && lastRect.Contains(Event.current.mousePosition))
 			{
 				if(action == null)
 					return;

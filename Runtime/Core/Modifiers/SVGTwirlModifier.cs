@@ -17,8 +17,7 @@ namespace SVGImporter
 
         protected override void PrepareForRendering (SVGLayer[] layers, SVGAsset svgAsset, bool force) 
         {
-            if (!active) return;
-            if (center == null) return;
+            if(center == null) return;
             Vector2 position = center.position;
             Vector2 direction, directionNormalized;
             float distance;
@@ -53,33 +52,28 @@ namespace SVGImporter
                         }
                     }
                 }
-            } else            
-            {
-                if (layerSelection.layers != null)
+            } else {
+                for(int i = 0; i < totalLayers; i++)
                 {
-                    int selectionCount = layerSelection.layers.Count;
-                    for (int i = 0; i < selectionCount; i++)
+                    if(layers[i].shapes == null) continue;
+                    if(!layerSelection.Contains(i)) continue;
+
+                    int shapesLength = layers[i].shapes.Length;
+                    for(int j = 0; j < shapesLength; j++)
                     {
-                        int layerIndex = layerSelection.layers[i];
-                        if (layerIndex < 0 || layerIndex >= totalLayers) continue;
-                        if (layers[layerIndex].shapes == null) continue;
-                        int shapesLength = layers[layerIndex].shapes.Length;
-                        for (int j = 0; j < shapesLength; j++)
+                        int vertexCount = layers[i].shapes[j].vertexCount;
+                        for(int k = 0; k < vertexCount; k++)
                         {
-                            int vertexCount = layers[layerIndex].shapes[j].vertexCount;
-                            for (int k = 0; k < vertexCount; k++)
-                            {
-                                direction.x = layers[layerIndex].shapes[j].vertices[k].x - position.x;
-                                direction.y = layers[layerIndex].shapes[j].vertices[k].y - position.y;
-                                distance = Mathf.Sqrt(direction.x * direction.x + direction.y * direction.y);
-
-                                float theta = Mathf.Atan2(direction.y, direction.x);
-                                theta += vortexIntensity * (1f - Mathf.Clamp01(distance / radius));
-                                directionNormalized.x = Mathf.Cos(theta) * distance + position.x;
-                                directionNormalized.y = Mathf.Sin(theta) * distance + position.y;
-
-                                layers[layerIndex].shapes[j].vertices[k] = directionNormalized;
-                            }
+                            direction.x = layers[i].shapes[j].vertices[k].x - position.x;
+                            direction.y = layers[i].shapes[j].vertices[k].y - position.y;
+                            distance = Mathf.Sqrt(direction.x * direction.x + direction.y * direction.y);
+                            
+                            float theta = Mathf.Atan2(direction.y, direction.x);
+                            theta += vortexIntensity * (1f - Mathf.Clamp01(distance / radius));
+                            directionNormalized.x = Mathf.Cos(theta) * distance + position.x;
+                            directionNormalized.y = Mathf.Sin(theta) * distance + position.y;
+                            
+                            layers[i].shapes[j].vertices[k] = directionNormalized;
                         }
                     }
                 }

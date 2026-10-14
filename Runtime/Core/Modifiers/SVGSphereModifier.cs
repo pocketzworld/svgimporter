@@ -17,8 +17,7 @@ namespace SVGImporter
 
         protected override void PrepareForRendering (SVGLayer[] layers, SVGAsset svgAsset, bool force) 
         {
-            if (!active) return;
-            if (center == null) return;
+            if(center == null) return;
             Vector2 position = center.position;
             Vector2 direction, directionNormalized;
             float distance;
@@ -49,33 +48,28 @@ namespace SVGImporter
                         }
                     }
                 }
-            } else
-            {
-                if (layerSelection.layers != null)
+            } else {
+                for(int i = 0; i < totalLayers; i++)
                 {
-                    int selectionCount = layerSelection.layers.Count;
-                    for (int i = 0; i < selectionCount; i++)
-                    {
-                        int layerIndex = layerSelection.layers[i];
-                        if (layerIndex < 0 || layerIndex >= totalLayers) continue;
-                        if (layers[layerIndex].shapes == null) continue;
-                        int shapesLength = layers[layerIndex].shapes.Length;
-                        for (int j = 0; j < shapesLength; j++)
-                        {
-                            int vertexCount = layers[layerIndex].shapes[j].vertexCount;
-                            for (int k = 0; k < vertexCount; k++)
-                            {
-                                direction = position - layers[layerIndex].shapes[j].vertices[k];
-                                distance = Mathf.Sqrt(direction.x * direction.x + direction.y * direction.y);
-                                directionNormalized = Vector2.zero;
-                                if (distance > 0f)
-                                {
-                                    directionNormalized.x = direction.x / distance;
-                                    directionNormalized.y = direction.y / distance;
-                                }
+                    if(layers[i].shapes == null) continue;
+                    if(!layerSelection.Contains(i)) continue;
 
-                                layers[layerIndex].shapes[j].vertices[k] += directionNormalized * (1f - Mathf.Clamp01(distance / radius)) * intensity;
+                    int shapesLength = layers[i].shapes.Length;
+                    for(int j = 0; j < shapesLength; j++)
+                    {
+                        int vertexCount = layers[i].shapes[j].vertexCount;
+                        for(int k = 0; k < vertexCount; k++)
+                        {
+                            direction = position - layers[i].shapes[j].vertices[k];
+                            distance = Mathf.Sqrt(direction.x * direction.x + direction.y * direction.y);
+                            directionNormalized = Vector2.zero;
+                            if(distance > 0f)
+                            {
+                                directionNormalized.x = direction.x / distance;
+                                directionNormalized.y = direction.y / distance;
                             }
+                            
+                            layers[i].shapes[j].vertices[k] += directionNormalized * (1f - Mathf.Clamp01(distance / radius)) * intensity;
                         }
                     }
                 }

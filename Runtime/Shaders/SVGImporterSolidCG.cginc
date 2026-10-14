@@ -1,5 +1,6 @@
-﻿
-
+﻿// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
+// This code can only be used under the standard Unity Asset Store End User License Agreement
+// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
 #include "SVGImporterCG.cginc"
 
 struct vertex_input
@@ -37,7 +38,7 @@ vertex_output vertexColorAntialiased(vertex_input_normal v)
 	return o;
 }
 
-half4 fragmentColor(vertex_output i) : SV_Target
+half4 fragmentColor(vertex_output i) : COLOR
 {
 	return i.color;
 }

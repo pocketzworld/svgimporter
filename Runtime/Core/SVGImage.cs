@@ -1,5 +1,8 @@
 
 
+//#define DEBUG_MATERIALS
+
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
@@ -25,7 +28,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("vectorGraphics")]
         [SerializeField]
-        protected SVGAsset _vectorGraphics;
+        protected SVGAsset _vectorGraphics = default;
         protected SVGAsset _lastVectorGraphics;
         public SVGAsset vectorGraphics
         {
@@ -74,7 +77,7 @@ namespace SVGImporter
                 return _lastFrameChanged;
             }
         }
-
+        
         public void AddModifier(ISVGModify modifier)
         {
             if(_modifiers.Contains(modifier)) return;
@@ -134,14 +137,18 @@ namespace SVGImporter
             base.OnDestroy();
         }
 
-
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         protected override void Reset()
+        #else
+        private void OnAwake()
+        #endif
         {
             Clear();
             _vectorGraphics = null;
             UpdateMaterial();
+#if UNITY_EDITOR
             base.Reset();
+#endif
         }
 
         protected void Refresh()
@@ -149,7 +156,6 @@ namespace SVGImporter
             Clear();
             UpdateMaterial();
         }
-#endif        
        
         /// <summary>
         /// Whether the Image has a border to work with.
@@ -340,32 +346,49 @@ namespace SVGImporter
         const float epsilon = 0.0000001f;
 
         int tempVBOLength;
-        UIVertex[] vertexStream;
-        Vector3[] vertices;
-        int[] triangles;
-        Vector2[] uv;
-        Vector2[] uv2;
-        Vector2[] uv3;
-        Color32[] colors;
-        Vector3[] normals;
+        static List<UIVertex> vertexStream = new List<UIVertex>();
+        static List<Vector3> vertices = new List<Vector3>();
+        static List<int> triangles = new List<int>();
+        static List<Vector2> uv = new List<Vector2>();
+        static List<Vector2> uv2 = new List<Vector2>();
+        static List<Color32> colors = new List<Color32>();
+        static List<Vector3> normals = new List<Vector3>();
         
         protected override void OnPopulateMesh(VertexHelper vh)
         {
-            if (canvas == null) return;
-            if (sharedMesh == null) { base.OnPopulateMesh(vh); return; }
+            if(sharedMesh == null)
+            {
+                base.OnPopulateMesh(vh); 
+                return;
+            }
+
+            if(vh == null || canvas==null || _vectorGraphics==null)
+            {
+                return;
+            }
+
             vh.Clear();
+
             Mesh mesh = sharedMesh;
             tempVBOLength = mesh.vertexCount;
 
-            vertices = mesh.vertices;
-            triangles = mesh.triangles;
-            uv = mesh.uv;
-            uv2 = mesh.uv2;
-            colors = mesh.colors32;
-            normals = mesh.normals;
-            
-            if(vertexStream == null || vertexStream.Length != tempVBOLength) vertexStream = new UIVertex[tempVBOLength];
-            
+            mesh.GetVertices(vertices);
+            mesh.GetTriangles(triangles, 0);
+            mesh.GetUVs(0, uv);
+            mesh.GetUVs(1, uv2);
+            mesh.GetColors(colors);
+            mesh.GetNormals(normals);
+
+            vertexStream.Clear();
+            if(vertexStream.Capacity < tempVBOLength)
+            {
+                vertexStream.Capacity = tempVBOLength;
+            }
+            for(int i = 0; i < tempVBOLength; i++)
+            {
+                vertexStream.Add(new UIVertex());
+            }
+
             if (_vectorGraphics.antialiasing || _vectorGraphics.generateNormals)
             {
                 canvas.additionalShaderChannels = AdditionalCanvasShaderChannels.TexCoord1 | AdditionalCanvasShaderChannels.TexCoord2 | AdditionalCanvasShaderChannels.Normal;
@@ -387,9 +410,11 @@ namespace SVGImporter
                 
                 for(int i = 0; i < tempVBOLength; i++)
                 {
-                    vertexStream[i].position.x = v.x + InverseLerp(bounds.min.x, bounds.max.x, vertices[i].x) * v.z;
-                    vertexStream[i].position.y = v.y + InverseLerp(bounds.min.y, bounds.max.y, vertices[i].y) * v.w;
-                    vertexStream[i].color = colors[i] * color;                    
+                    UIVertex vertex = vertexStream[i];
+                    vertex.position.x = v.x + InverseLerp(bounds.min.x, bounds.max.x, vertices[i].x) * v.z;
+                    vertex.position.y = v.y + InverseLerp(bounds.min.y, bounds.max.y, vertices[i].y) * v.w;
+                    vertex.color = colors[i] * color;
+                    vertexStream[i] = vertex;
                 }
             } else
             {
@@ -443,41 +468,45 @@ namespace SVGImporter
                 
                 for(int i = 0; i < tempVBOLength; i++)
                 {
-                    vertexStream[i].color = colors[i] * color;
+                    UIVertex vertex = vertexStream[i];
+                    vertex.color = colors[i] * color;
                     
                     normalizedPosition.x = InverseLerp(bounds.min.x, bounds.max.x, vertices[i].x);
                     normalizedPosition.y = InverseLerp(bounds.min.y, bounds.max.y, vertices[i].y);
                     
                     if(border.x != 0f && normalizedPosition.x <= borderCalc.x)
                     {
-                        vertexStream[i].position.x = transformRect.x + normalizedPosition.x * size.x;
+                        vertex.position.x = transformRect.x + normalizedPosition.x * size.x;
                     } else if(border.z != 0f && normalizedPosition.x >= borderCalc.z)
                     {
-                        vertexStream[i].position.x = transformRect.z - (1f - normalizedPosition.x) * size.x;
+                        vertex.position.x = transformRect.z - (1f - normalizedPosition.x) * size.x;
                     } else {
-                        vertexStream[i].position.x = borderLeft + (normalizedPosition.x - border.x) * scale.x;
+                        vertex.position.x = borderLeft + (normalizedPosition.x - border.x) * scale.x;
                     }
                     
                     if(border.w != 0f && normalizedPosition.y >= borderCalc.w)
                     {
-                        vertexStream[i].position.y = transformRect.w - (1f - normalizedPosition.y) * size.y;
+                        vertex.position.y = transformRect.w - (1f - normalizedPosition.y) * size.y;
                     } else if(border.y != 0f && normalizedPosition.y <= borderCalc.y)
                     {
-                        vertexStream[i].position.y = transformRect.y + normalizedPosition.y * size.y;
+                        vertex.position.y = transformRect.y + normalizedPosition.y * size.y;
                     } else {
-                        vertexStream[i].position.y = borderTop - (((1f - normalizedPosition.y) - border.w) * scale.y);
-                    }                    
+                        vertex.position.y = borderTop - (((1f - normalizedPosition.y) - border.w) * scale.y);
+                    }
+                    vertexStream[i] = vertex;
                 }
             }
             
             if (_vectorGraphics.hasGradients || _vectorGraphics.useGradients == SVGUseGradients.Always)
             {
-                if(uv != null && uv2 != null && tempVBOLength == uv.Length && tempVBOLength == uv2.Length)
+                if(uv != null && uv2 != null && tempVBOLength == uv.Count && tempVBOLength == uv2.Count)
                 {
                     for(int i = 0; i < tempVBOLength; i++)
                     {
-                        vertexStream[i].uv0 = uv[i];
-                        vertexStream[i].uv1 = uv2[i];
+                        UIVertex vertex = vertexStream[i];
+                        vertex.uv0 = uv[i];
+                        vertex.uv1 = uv2[i];
+                        vertexStream[i] = vertex;
                     }
                 }                
             }
@@ -486,29 +515,33 @@ namespace SVGImporter
             {
                 if(_vectorGraphics.antialiasing)
                 {
-                    if(normals != null && tempVBOLength == normals.Length)
+                    if(normals != null && tempVBOLength == normals.Count)
                     {
                         for(int i = 0; i < tempVBOLength; i++)
                         {
-                            vertexStream[i].normal.x = normals[i].x;
-                            vertexStream[i].normal.y = normals[i].y;
+                            UIVertex vertex = vertexStream[i];
+                            vertex.normal.x = normals[i].x;
+                            vertex.normal.y = normals[i].y;
+                            vertexStream[i] = vertex;
                         }
                     } 
                 }
             } else {
                 if(_vectorGraphics.generateNormals)
                 {
-                    if(normals != null && normals.Length == tempVBOLength)
+                    if(normals != null && normals.Count == tempVBOLength)
                     {
                         for(int i = 0; i < tempVBOLength; i++)
                         {
-                            vertexStream[i].normal = normals[i];
+                            UIVertex vertex = vertexStream[i];
+                            vertex.normal = normals[i];
+                            vertexStream[i] = vertex;
                         }
                     }
                 }
             }
             
-            vh.AddUIVertexStream(new List<UIVertex>(vertexStream), new List<int>(triangles));
+            vh.AddUIVertexStream(vertexStream, triangles);
 
             _lastFrameChanged = Time.frameCount;
         }

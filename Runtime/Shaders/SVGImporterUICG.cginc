@@ -1,10 +1,12 @@
-
-
+// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
+// This code can only be used under the standard Unity Asset Store End User License Agreement
+// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
 #include "SVGImporterCG.cginc"
 
 sampler2D _GradientColor;
 sampler2D _GradientShape;
 float4 _Params;
+float4 _GradientColor_TexelSize;
 
 float4 _ClipRect;
 fixed4 _TextureSampleAdd;
@@ -21,7 +23,7 @@ struct vertex_input
 
 struct vertex_output
 {
-    float4 vertex : SV_POSITION;			    
+    float4 vertex : POSITION;			    
     float4 uv0 : TEXCOORD0;
     float4 uv1 : TEXCOORD1;
     float4 worldPosition : TEXCOORD2;
@@ -78,16 +80,18 @@ vertex_output vertexGradientsAntialiased(vertex_input v)
     return o;
 }
 
-half4 fragmentGradientsOpaque(vertex_output i) : SV_Target
+half4 fragmentGradientsOpaque(vertex_output i) : COLOR
 {
 	float gradient = dot(tex2D(_GradientShape, i.uv0), i.uv1) ;
 	float2 gradientColorUV = float2(i.uv0.z + gradient, i.uv0.w);
 	return float4((tex2D(_GradientColor, gradientColorUV).rgb + _TextureSampleAdd) * i.color.rgb, 1.0);
 }
 
-half4 fragmentGradientsAlphaBlended(vertex_output i) : SV_Target
+half4 fragmentGradientsAlphaBlended(vertex_output i) : COLOR
 {
-	float gradient = dot(tex2D(_GradientShape, i.uv0), i.uv1) ;
+    float colorW = _Params.z / _Params.x;
+    float d = min((dot(tex2D(_GradientShape, i.uv0.xy), i.uv1.xy)), colorW);
+    float gradient = d * (1.0 - _GradientColor_TexelSize.x/colorW); //ensure the correct width (1 on px)
 	float2 gradientColorUV = float2(i.uv0.z + gradient, i.uv0.w);
 	half4 output = (tex2D(_GradientColor, gradientColorUV) + _TextureSampleAdd) * i.color;
 	

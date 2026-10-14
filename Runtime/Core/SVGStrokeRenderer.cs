@@ -12,8 +12,8 @@ namespace SVGImporter
     [ExecuteInEditMode]
     [RequireComponent(typeof(ISVGShape), typeof(ISVGRenderer))]
     [AddComponentMenu("Rendering/SVG Stroke Renderer", 21)]
-    public class SVGStrokeRenderer : MonoBehaviour, ISVGModify
-    {   
+    public class SVGStrokeRenderer : MonoBehaviour, ISVGModify {
+
         public StrokeLineJoin lineJoin = StrokeLineJoin.miter;
         public StrokeLineCap lineCap = StrokeLineCap.butt;
         public Color32 color = Color.white;
@@ -94,14 +94,6 @@ namespace SVGImporter
                 svgRenderer = null;
             }
             svgShape = null;
-        }
-
-        public bool active
-        {
-            get
-            {
-                return enabled;
-            }
         }
 
         void OnEnable()

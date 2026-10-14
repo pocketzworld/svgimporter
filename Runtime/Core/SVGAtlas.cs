@@ -3,6 +3,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Rendering;
 
 namespace SVGImporter
 {
@@ -380,9 +381,8 @@ namespace SVGImporter
                 DontDestroyOnLoad(gameObject);
             _atlasHasChanged = false;
             _beingDestroyed = false;
-            AddFakeCamera();
+            //AddFakeCamera();
 
-            Camera.onPreRender += OnAtlasPreRender;
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.update += EditorUpdate;
 #endif
@@ -402,7 +402,8 @@ namespace SVGImporter
         protected void OnDestroy()
         {
             _beingDestroyed = true;
-            Camera.onPreRender -= OnAtlasPreRender;
+             RenderPipelineManager.beginCameraRendering -= OnAtlasPreRender;
+
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.update -= EditorUpdate;
 #endif
@@ -410,15 +411,21 @@ namespace SVGImporter
 
         protected void AddFakeCamera()
         {
-                Camera camera = gameObject.AddComponent<Camera>();
-                camera.hideFlags = HideFlags.DontSave;
-                camera.clearFlags = CameraClearFlags.Nothing;
-                camera.orthographic = true;
-                camera.depth = float.MinValue;
-                camera.cullingMask = 0;
-                camera.useOcclusionCulling = false;
+            Camera camera = gameObject.AddComponent<Camera>();
+            camera.hideFlags = HideFlags.DontSave;
+            camera.clearFlags = CameraClearFlags.Nothing;
+            camera.orthographic = true;
+            camera.depth = -100;
+            camera.cullingMask = 0;
+            camera.useOcclusionCulling = false;
         }
         
+
+        public void OnAtlasPreRender(ScriptableRenderContext context, Camera camera = null)
+        {
+            OnAtlasPreRender(camera);
+        }
+
         public void OnAtlasPreRender(Camera camera = null)
         {
             SVGImporterSettings.UpdateAntialiasing();
@@ -427,9 +434,7 @@ namespace SVGImporter
             {
                 RebuildAtlas();
                 _atlasHasChanged = false;
-#if UNITY_EDITOR
                 UpdateMaterialList();
-#endif
             }
         }
 
@@ -443,6 +448,7 @@ namespace SVGImporter
                     if(instances != null && instances.Length > 0)
                     {
                         _Instance = instances[0];
+                        RenderPipelineManager.beginCameraRendering += _Instance.OnAtlasPreRender;
 //                        Debug.Log("SVGAtlas, found instances: "+instances.Length);
                     }
                 }
@@ -453,6 +459,7 @@ namespace SVGImporter
                     _Instance = go.GetComponent<SVGAtlas>();
                     _Instance.hideFlags = HideFlags.DontSave;
                     _Instance.Init();
+                    RenderPipelineManager.beginCameraRendering += _Instance.OnAtlasPreRender;
                 }
                 
                 return _Instance;
@@ -577,6 +584,13 @@ namespace SVGImporter
                 }
             }
             
+            if (x + gradientWidth > texture.width || y + gradientHeight > texture.height)
+            {
+                // Seeing these in production: Trying to render Gradient into texture Atlas 0 which is not big enough: (0, 512), w:128, h:4. Texture: 512, 512
+                Debug.LogError($"Trying to render Gradient into texture {texture.name} which is not big enough: ({x}, {y}), w:{gradientWidth}, h:{gradientHeight}. Texture: {texture.width}, {texture.height}");
+                return;
+            }
+            
             texture.SetPixels(x, y, gradientWidth, gradientHeight, pixels);
         }
 
@@ -628,12 +642,13 @@ namespace SVGImporter
 
 		public static Texture2D CreateTexture(int width, int height)
 		{
-			Texture2D texture = new Texture2D (width, height, TextureFormat.ARGB32, false);
-			texture.filterMode = FilterMode.Bilinear;
-			texture.wrapMode = TextureWrapMode.Clamp;
-//			texture.alphaIsTransparency = true;
-			texture.anisoLevel = 0;
-			return texture;
+			return new Texture2D (width, height, TextureFormat.ARGB32, false)
+            {
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp,
+                // alphaIsTransparency = true,
+                anisoLevel = 0
+            };
 		}
 
         public CCGradient AddGradient(CCGradient gradient)
@@ -713,6 +728,7 @@ namespace SVGImporter
                 if (newTexture) {
                     CreateAtlasTexture (atlasIndex, atlasTextureWidth, atlasTextureHeight);
                 }
+                // Render Gradient uses SetPixels()
 				RenderGradient (atlasTextures [atlasIndex], gradients [i], x, y, gradientWidth, gradientHeight);
             }
             

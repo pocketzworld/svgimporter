@@ -103,7 +103,6 @@ namespace SVGImporter.Document
                 if ('\u02BB' <= c && c <= '\u02C1')
                     return true;
             }
-#if !UNITY_WSA
             switch (Char.GetUnicodeCategory(c))
             {
                 case UnicodeCategory.LowercaseLetter:
@@ -121,7 +120,6 @@ namespace SVGImporter.Document
                 default:
                     return false;
             }
-#endif
         }
 
         private bool IsWhitespace(int c)

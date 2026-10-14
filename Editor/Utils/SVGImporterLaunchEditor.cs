@@ -1,6 +1,4 @@
-// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
-// This code can only be used under the standard Unity Asset Store End User License Agreement
-// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
+
 
 using UnityEngine;
 using UnityEditor;
@@ -14,7 +12,8 @@ namespace SVGImporter
 {
     using Utils;
 
-	internal class DelayedCall
+#pragma warning disable 0618
+    internal class DelayedCall
     {
         public System.Action callback;
         public System.Action<UnityEngine.WWW> wwwCallback;
@@ -86,7 +85,7 @@ namespace SVGImporter
                 _active = true;
             }
 
-            //HideGizmos();
+            HideGizmos();
             SVGPostprocessor.Init();
             UpdateDelegates();
 
@@ -182,7 +181,6 @@ namespace SVGImporter
             UpdateDelegates();
         }
 
-        /*
         public static void HideGizmos()
         {
             var Annotation = System.Type.GetType("UnityEditor.Annotation, UnityEditor");
@@ -207,13 +205,16 @@ namespace SVGImporter
                    scriptClass == typeof(SVGRenderer).Name || 
                    scriptClass == typeof(SVGCollider2D).Name
                    )
-                {                    
+                {
+                    /*
+                    if(SetGizmoEnabled != null)
+                        SetGizmoEnabled.Invoke(null, new object[] { classId, scriptClass, 0 });
+                    */
                     if(SetIconEnabled != null)
                         SetIconEnabled.Invoke(null, new object[] { classId, scriptClass, 0 });
                 }
             }
         }
-        */
 
         static void PlaymodeStateChanged()
         {
@@ -492,5 +493,6 @@ namespace SVGImporter
             return ipAdress;
         }
 	}
+#pragma warning restore 0618
 }
 

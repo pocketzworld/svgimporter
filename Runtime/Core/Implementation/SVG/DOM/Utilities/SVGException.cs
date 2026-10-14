@@ -1,6 +1,7 @@
 
 
 using System;
+//using System.Runtime.Serialization;
 
 namespace SVGImporter.Document
 {
@@ -26,7 +27,11 @@ namespace SVGImporter.Document
         {
             code = errorCode;
         }
-       
+        /*
+        protected SVGException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+        */
         private SVGExceptionType code;
 
         public new SVGExceptionType Code

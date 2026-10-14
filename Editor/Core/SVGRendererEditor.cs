@@ -1,6 +1,4 @@
-// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
-// This code can only be used under the standard Unity Asset Store End User License Agreement
-// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
+
 
 using UnityEngine;
 using UnityEditor;
@@ -11,6 +9,7 @@ using System.Reflection;
 
 namespace SVGImporter
 {
+#pragma warning disable 0618
     [CanEditMultipleObjects]
     [CustomEditor(typeof(SVGRenderer))]
     public class SVGRendererEditor : Editor
@@ -72,7 +71,7 @@ namespace SVGImporter
                 SVGRenderer renderer = (SVGRenderer)target;
                 Renderer meshRenderer = renderer.GetComponent<Renderer>();
                 if (meshRenderer != null)
-                    EditorUtility.SetSelectedRenderState(meshRenderer, EditorSelectedRenderState.Hidden);
+                    UnityEditor.EditorUtility.SetSelectedWireframeHidden(meshRenderer, true);
             } else
             {
                 UnityEngine.Object[] renderers = (UnityEngine.Object[])targets;
@@ -86,7 +85,9 @@ namespace SVGImporter
                             continue;
                         MeshRenderer meshRenderer = renderer.GetComponent<MeshRenderer>();
                         if (meshRenderer != null)
-                            EditorUtility.SetSelectedRenderState(meshRenderer, EditorSelectedRenderState.Hidden);
+                        {
+                            EditorUtility.SetSelectedWireframeHidden(meshRenderer, true);
+                        }
                     }
                 }
             }
@@ -212,14 +213,10 @@ namespace SVGImporter
             }
 
             if (EditorGUI.EndChangeCheck())
-            {                
+            {
                 serializedObject.ApplyModifiedProperties();
-                for (int i = 0; i < serializedObject.targetObjects.Length; i++)
-                {
-                    SVGRenderer svgRenderer = serializedObject.targetObjects[i] as SVGRenderer;
-                    if (svgRenderer != null) svgRenderer.UpdateRenderer();
-                }
             }
+            //if(serializedObject.ApplyModifiedProperties() || (Event.current.type == EventType.ValidateCommand && Event.current.commandName == "UndoRedoPerformed"))
         }
        
         public override string GetInfoString()
@@ -252,4 +249,5 @@ namespace SVGImporter
             return (int[])sortingLayerUniqueIDsProperty.GetValue(null, new object[0]);
         }
     }
+#pragma warning restore 0618
 }

@@ -56,7 +56,7 @@ namespace SVGImporter
         // Tracking of modified assets
         [FormerlySerializedAs("lastTimeModified")]
         [SerializeField]
-        protected long _lastTimeModified;
+        protected long _lastTimeModified = default;
 
         // Tracking of modified assets
         protected Rect _rectTransformRect;
@@ -74,7 +74,7 @@ namespace SVGImporter
         // Serialized SVG Asset
         [FormerlySerializedAs("vectorGraphics")]
         [SerializeField]
-        protected SVGAsset _vectorGraphics;
+        protected SVGAsset _vectorGraphics = default;
         protected SVGAsset _lastVectorGraphics;
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace SVGImporter
         
         [FormerlySerializedAs("opaqueMaterial")]
         [SerializeField]
-        protected Material _opaqueMaterial;
+        protected Material _opaqueMaterial = default;
         protected Material _lastOpaqueMaterial;
         /// <summary>
         /// The opaque override material
@@ -136,7 +136,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("transparentMaterial")]
         [SerializeField]
-        protected Material _transparentMaterial;
+        protected Material _transparentMaterial = default;
         protected Material _lastTransparentMaterial;
         /// <summary>
         /// The opaque override material
@@ -219,7 +219,7 @@ namespace SVGImporter
         // Unity default transparent sorting layer name
         [FormerlySerializedAs("sortingLayerName")]
         [SerializeField]
-        protected string _sortingLayerName;
+        protected string _sortingLayerName = default;
         /// <summary>
         /// Name of the Renderer's sorting layer.
         /// </summary>
@@ -314,6 +314,9 @@ namespace SVGImporter
 
             Clear();
             PrepareForRendering(true);
+#if UNITY_EDITOR
+            UpdateTimeStamp();
+#endif
         }
 
         protected override void OnEnable()
@@ -321,7 +324,17 @@ namespace SVGImporter
             base.OnEnable();
             EnableMeshRenderer(true);
         }
-        
+
+        // This method is invoked by Unity when rendering to Camera
+        void OnWillRenderObject()
+        {
+#if UNITY_EDITOR
+            UpdateTimeStamp();
+#endif
+            if (!meshRenderer.isPartOfStaticBatch)
+                PrepareForRendering();
+        }
+
 #if UNITY_EDITOR
         void OnDrawGizmosSelected()
         {
@@ -377,13 +390,12 @@ namespace SVGImporter
         {
             PrepareForRendering(true);
         }
-        
+        /*
         protected override void OnDidApplyAnimationProperties()
         {
-            if (!meshRenderer.isPartOfStaticBatch)
-                PrepareForRendering();
+            Debug.Log("OnDidApplyAnimationProperties: "+Time.frameCount);
         }
-        
+        */
         // This is the main rendering method
         protected void PrepareForRendering(bool force = false)
         {           
@@ -420,9 +432,8 @@ namespace SVGImporter
                 {
                     meshChanged = true;
                     colorChanged = true;
-                    materialChanged = true;
 
-                    if (_lastVectorGraphics != null)
+                    if(_lastVectorGraphics != null)
                     {
                         _lastVectorGraphics.RemoveReference(this);
                     }
@@ -518,10 +529,6 @@ namespace SVGImporter
                 _lastType = _type;
                 _lastUseSharedMesh = useSharedMesh;                
             }
-
-#if UNITY_EDITOR
-            UpdateTimeStamp();
-#endif
         }
 
         protected void GenerateMesh()

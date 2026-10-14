@@ -409,15 +409,15 @@ namespace SVGImporter
     {
         [FormerlySerializedAs("lastTimeModified")]
         [SerializeField]
-        protected long _lastTimeModified;
+        protected long _lastTimeModified = default;
 
         [FormerlySerializedAs("documentAsset")]
         [SerializeField]
-        protected SVGDocumentAsset _documentAsset;
+        protected SVGDocumentAsset _documentAsset = default;
 
         [FormerlySerializedAs("sharedMesh")]
         [SerializeField]
-        protected Mesh _sharedMesh;
+        protected Mesh _sharedMesh = default;
 
         /// <summary>
         /// Returns the shared mesh of the SVG Asset. (Read Only)
@@ -466,7 +466,7 @@ namespace SVGImporter
         {
             if(hasGradients)
             {
-                MonoBehaviour mb = reference as MonoBehaviour;                
+                //MonoBehaviour mb = reference as MonoBehaviour;                
                 if(SVGAtlas.beingDestroyed) return;
                 for(int i = 0; i < _sharedGradients.Length; i++)
                 {
@@ -487,7 +487,7 @@ namespace SVGImporter
         {
             if(hasGradients)
             {
-                MonoBehaviour mb = reference as MonoBehaviour;                
+                //MonoBehaviour mb = reference as MonoBehaviour;                
                 int totalReferences = 0;
                 if(SVGAtlas.beingDestroyed) return;
                 for(int i = 0; i < _sharedGradients.Length; i++)
@@ -767,7 +767,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("colliderShape")]
         [SerializeField]
-        protected SVGPath[] _colliderShape;
+        protected SVGPath[] _colliderShape = default;
         /// <summary>
         /// Returns the collider shape. (Read Only)
         /// </summary>
@@ -983,7 +983,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("sharedGradients")]
         [SerializeField]
-        protected CCGradient[] _sharedGradients;
+        protected CCGradient[] _sharedGradients = default;
         /// <summary>
         /// Returns all the used gradients in the SVG Asset. (Read Only)
         /// </summary>
@@ -995,7 +995,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("sharedShaders")]
         [SerializeField]
-        protected string[] _sharedShaders;
+        protected string[] _sharedShaders = default;
         /// <summary>
         /// Returns all the used shader names in the SVG Asset. (Read Only)
         /// </summary>
@@ -1020,7 +1020,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("canvasRectangle")]
         [SerializeField]
-        protected Rect _canvasRectangle;
+        protected Rect _canvasRectangle = default;
         /// <summary>
         /// Returns the Original Canvas rectangle of the SVG Asset. (Read Only)
         /// </summary>
@@ -1046,7 +1046,7 @@ namespace SVGImporter
 
         [FormerlySerializedAs("layers")]
         [SerializeField]
-        protected SVGLayer[] _layers;
+        protected SVGLayer[] _layers = default;
         /// <summary>
         /// Returns individual SVG layers. (Read Only)
         /// </summary>
@@ -1599,7 +1599,7 @@ namespace SVGImporter
 
                 int vertexCount = _sharedMesh.vertexCount;
                 UnityEditor.MeshUtility.SetMeshCompression(_sharedMesh, GetModelImporterMeshCompression(_meshCompression));
-                if(_optimizeMesh) ;
+                //if(_optimizeMesh) ;
                 if(_generateNormals)
                 {
                     if(!_antialiasing)

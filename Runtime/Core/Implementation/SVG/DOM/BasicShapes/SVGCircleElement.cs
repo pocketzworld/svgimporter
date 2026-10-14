@@ -77,7 +77,6 @@ namespace SVGImporter.Rendering
         public List<List<Vector2>> GetPath()
         {
             List<Vector2> output = Circle(cx.value, cy.value, r.value, transformMatrix);
-            if(output.Count == 0) return new List<List<Vector2>>();
             output.Add(output[0]);            
             return new List<List<Vector2>>(){output};
         }

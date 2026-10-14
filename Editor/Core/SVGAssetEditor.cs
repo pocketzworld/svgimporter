@@ -1,6 +1,4 @@
-// Copyright (C) 2015 Jaroslav Stehlik - All Rights Reserved
-// This code can only be used under the standard Unity Asset Store End User License Agreement
-// A Copy of the EULA APPENDIX 1 is available at http://unity3d.com/company/legal/as_terms
+
 
 using UnityEngine;
 using UnityEditor;
@@ -633,6 +631,7 @@ namespace SVGImporter
             }
         }
 
+
         protected void SaveMeshFile(SVGAsset meshAsset)
         {
             string assetPath = AssetDatabase.GetAssetPath(meshAsset);
@@ -643,12 +642,13 @@ namespace SVGImporter
             } else {
                 lastPath += "/";
             }
-            string path = EditorUtility.SaveFilePanel("Save Mesh File", Path.GetDirectoryName(lastPath), Path.GetFileNameWithoutExtension(assetPath)+"-mesh", "asset" );
-            if(!string.IsNullOrEmpty(path))
+            string path = EditorUtility.SaveFilePanelInProject("Save Mesh File", Path.GetFileNameWithoutExtension(assetPath) + "-mesh", "asset", "", Path.GetDirectoryName(lastPath));
+            //string path = EditorUtility.SaveFilePanel("Save Mesh File", Path.GetDirectoryName(lastPath), Path.GetFileNameWithoutExtension(assetPath) + "-mesh.asset", "asset");
+            if (!string.IsNullOrEmpty(path))
             {
-                System.Uri assetFolderPath = new Uri(Application.dataPath);
-                System.Uri outputPath = new Uri(path);
-                path = assetFolderPath.MakeRelativeUri(outputPath).ToString();
+                //System.Uri assetFolderPath = new Uri(Application.dataPath);
+                //System.Uri outputPath = new Uri(path);
+                //path = assetFolderPath.MakeRelativeUri(outputPath).ToString();
 
                 lastSVGRecoveryPath = Path.GetDirectoryName(path);
 
@@ -665,7 +665,6 @@ namespace SVGImporter
                 EditorUtility.RevealInFinder(path);
             }
         }
-
         public void ApplyChanges()
         {
             if(serializedObject.isEditingMultipleObjects)
