@@ -1,3 +1,7 @@
+Version 1.1.6-h4k.2
+Release Date: 12 November 2026
+- Fixed, a gradient fill drawn white on a compressed mesh: the runtime mesh rounds the stored gradient index instead of flooring it (index 1 decoded as 0.999997)
+
 Version 1.1.6-h4k.1
 Release Date: 14 October 2026
 - Hotel Hideaway fork as a Unity package (com.hotelhideaway.svgimporter); upstream .meta GUIDs unchanged
