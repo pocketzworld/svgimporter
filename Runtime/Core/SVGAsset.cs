@@ -558,7 +558,9 @@ namespace SVGImporter
                             int key;
                             for(int i = 0; i < uv2.Length; i++)
                             {
-                                key = Mathf.FloorToInt(Mathf.Abs(uv2[i].x));
+                                // Round, not floor: a compressed mesh stores the gradient index quantized, so
+                                // index 1 can come back as 0.999997 and flooring it drew gradient 0 (white).
+                                key = Mathf.RoundToInt(Mathf.Abs(uv2[i].x));
                                 try {
                                     uv2[i].x = gradientCache[key];
                                 } catch {}
