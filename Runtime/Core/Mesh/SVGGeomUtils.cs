@@ -55,25 +55,25 @@ namespace SVGImporter.Utils
             float tx, ty;
             double trx2, try2, tx2, ty2;
             float temp1, temp2;
-            float _radian = (angle * Mathf.PI / 180.0f);
+            float _radian = (float)((double)angle * Mathf.PI / 180.0);
             float _CosRadian = (float)Mathf.Cos(_radian);
             float _SinRadian = (float)Mathf.Sin(_radian);
-            temp1 = (p1.x - p2.x) / 2.0f;
-            temp2 = (p1.y - p2.y) / 2.0f;
-            tx = (_CosRadian * temp1) + (_SinRadian * temp2);
-            ty = (-_SinRadian * temp1) + (_CosRadian * temp2);
+            temp1 = (float)(((double)p1.x - p2.x) / 2.0);
+            temp2 = (float)(((double)p1.y - p2.y) / 2.0);
+            tx = (float)(((double)_CosRadian * temp1) + ((double)_SinRadian * temp2));
+            ty = (float)((-(double)_SinRadian * temp1) + ((double)_CosRadian * temp2));
             
-            trx2 = rx * rx;
-            try2 = ry * ry;
-            tx2 = tx * tx;
-            ty2 = ty * ty;
+            trx2 = (double)rx * rx;
+            try2 = (double)ry * ry;
+            tx2 = (double)tx * tx;
+            ty2 = (double)ty * ty;
                     
             double radiiCheck = tx2 / trx2 + ty2 / try2;
             if(radiiCheck > 1) {
                 rx = (float)(float)Mathf.Sqrt((float)radiiCheck) * rx;
                 ry = (float)Mathf.Sqrt((float)radiiCheck) * ry;
-                trx2 = rx * rx;
-                try2 = ry * ry;
+                trx2 = (double)rx * rx;
+                try2 = (double)ry * ry;
             }
             
             double tm1;
@@ -84,28 +84,28 @@ namespace SVGImporter.Utils
             tm2 = (largeArcFlag == sweepFlag) ? -(float)Mathf.Sqrt((float)tm1) : (float)Mathf.Sqrt((float)tm1);
                     
             float tcx, tcy;
-            tcx = tm2 * ((rx * ty) / ry);
-            tcy = tm2 * (-(ry * tx) / rx);
+            tcx = (float)((double)tm2 * (((double)rx * ty) / ry));
+            tcy = (float)((double)tm2 * (-((double)ry * tx) / rx));
             
             float cx, cy;
-            cx = _CosRadian * tcx - _SinRadian * tcy + ((p1.x + p2.x) / 2.0f);
-            cy = _SinRadian * tcx + _CosRadian * tcy + ((p1.y + p2.y) / 2.0f);
+            cx = (float)((double)_CosRadian * tcx - (double)_SinRadian * tcy + (((double)p1.x + p2.x) / 2.0));
+            cy = (float)((double)_SinRadian * tcx + (double)_CosRadian * tcy + (((double)p1.y + p2.y) / 2.0));
             
-            float ux = (tx - tcx) / rx;
-            float uy = (ty - tcy) / ry;
-            float vx = (-tx - tcx) / rx;
-            float vy = (-ty - tcy) / ry;
+            float ux = (float)(((double)tx - tcx) / rx);
+            float uy = (float)(((double)ty - tcy) / ry);
+            float vx = (float)((-(double)tx - tcx) / rx);
+            float vy = (float)((-(double)ty - tcy) / ry);
             float _angle, _delta;
             
             float p, n, t;
-            n = (float)Mathf.Sqrt((ux * ux) + (uy * uy));
+            n = (float)Mathf.Sqrt((float)(((double)ux * ux) + ((double)uy * uy)));
             p = ux;
             _angle = (uy < 0) ? -(float)Mathf.Acos(p / n) : (float)Mathf.Acos(p / n);
-            _angle = _angle * 180.0f / Mathf.PI;
+            _angle = (float)((double)_angle * 180.0 / Mathf.PI);
             _angle %= 360f;
             
-            n = (float)Mathf.Sqrt((ux * ux + uy * uy) * (vx * vx + vy * vy));
-            p = ux * vx + uy * vy;
+            n = (float)Mathf.Sqrt((float)(((double)ux * ux + (double)uy * uy) * ((double)vx * vx + (double)vy * vy)));
+            p = (float)((double)ux * vx + (double)uy * vy);
             t = p / n;
             if((Mathf.Abs(t) >= 0.99999f) && (Mathf.Abs(t) < 1.000009f)) {
                 if(t > 0)
@@ -113,9 +113,9 @@ namespace SVGImporter.Utils
                 else
                     t = -1f;
             }
-            _delta = (ux * vy - uy * vx < 0) ? -(float)Mathf.Acos(t) : (float)Mathf.Acos(t);
+            _delta = ((double)ux * vy - (double)uy * vx < 0) ? -(float)Mathf.Acos(t) : (float)Mathf.Acos(t);
             
-            _delta = _delta * 180.0f / Mathf.PI;
+            _delta = (float)((double)_delta * 180.0 / Mathf.PI);
             
             if(!sweepFlag && _delta > 0) {
                 _delta -= 360f;
@@ -126,15 +126,15 @@ namespace SVGImporter.Utils
 
             // * SVGGraphics.vpm
 
-            int number = Mathf.RoundToInt( Mathf.Clamp((100f / SVGGraphics.vpm) * Mathf.Abs(_delta) / 360f, 2, 100));
+            int number = Mathf.RoundToInt( Mathf.Clamp((float)((100.0 / SVGGraphics.vpm) * Mathf.Abs(_delta) / 360.0), 2, 100));
             float deltaT = _delta / number;
             
             Vector2 _point = new Vector2(0, 0);
             float t_angle;
             for(int i = 0; i <= number; i++) {
-                t_angle = (deltaT * i + _angle) * Mathf.PI / 180.0f;
-                _point.x = _CosRadian * rx * (float)Mathf.Cos(t_angle) - _SinRadian * ry * (float)Mathf.Sin(t_angle) + cx;
-                _point.y = _SinRadian * rx * (float)Mathf.Cos(t_angle) + _CosRadian * ry * (float)Mathf.Sin(t_angle) + cy;
+                t_angle = (float)(((double)deltaT * i + _angle) * Mathf.PI / 180.0);
+                _point.x = (float)((double)_CosRadian * rx * Mathf.Cos(t_angle) - (double)_SinRadian * ry * Mathf.Sin(t_angle) + cx);
+                _point.y = (float)((double)_SinRadian * rx * Mathf.Cos(t_angle) + (double)_CosRadian * ry * Mathf.Sin(t_angle) + cy);
                 output.Add(_point);
             }
             

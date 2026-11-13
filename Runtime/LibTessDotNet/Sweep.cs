@@ -347,12 +347,12 @@ namespace SVGImporter.LibTessDotNet
             var t1 = Geom.VertL1dist(org, isect);
             var t2 = Geom.VertL1dist(dst, isect);
 
-            w0 = 0.5f * t2 / (t1 + t2);
-            w1 = 0.5f * t1 / (t1 + t2);
+            w0 = (float)(0.5 * t2 / ((double)t1 + t2));
+            w1 = (float)(0.5 * t1 / ((double)t1 + t2));
 
-            isect._coords.X += w0 * org._coords.X + w1 * dst._coords.X;
-            isect._coords.Y += w0 * org._coords.Y + w1 * dst._coords.Y;
-            isect._coords.Z += w0 * org._coords.Z + w1 * dst._coords.Z;
+            isect._coords.X = (float)(isect._coords.X + (double)w0 * org._coords.X + (double)w1 * dst._coords.X);
+            isect._coords.Y = (float)(isect._coords.Y + (double)w0 * org._coords.Y + (double)w1 * dst._coords.Y);
+            isect._coords.Z = (float)(isect._coords.Z + (double)w0 * org._coords.Z + (double)w1 * dst._coords.Z);
         }
 
         /// <summary>
