@@ -1,7 +1,7 @@
 {
   "name": "com.hotelhideaway.svgimporter",
   "displayName": "SVG Importer (H4K fork)",
-  "version": "1.1.6-h4k.2",
+  "version": "1.1.6-h4k.3",
   "unity": "6000.3",
   "description": "SVG Importer by Jaroslav Stehlik with Hotel Hideaway fixes (Unity 6, URP, SVGImage mesh handling). Upstream: https://github.com/jaroslavstehlik/svgimporter",
   "author": {

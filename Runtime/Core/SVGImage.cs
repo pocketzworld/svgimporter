@@ -120,8 +120,12 @@ namespace SVGImporter
         protected override void Awake()
         {            
             Clear();
+            var referenced = _lastVectorGraphics;
             UpdateMaterial();
-            if(_vectorGraphics != null)
+            // GetDefaultMaterial (in UpdateMaterial) has just added this image to the asset's
+            // gradients where the asset changed, as it does at a first wake: adding it again
+            // changed no count and read every gradient's hash twice more (sc-322737).
+            if(_vectorGraphics != null && (referenced == _vectorGraphics || _lastVectorGraphics != _vectorGraphics))
             {
                 _vectorGraphics.AddReference(this);
             }
