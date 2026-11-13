@@ -155,11 +155,11 @@ namespace SVGImporter.LibTessDotNet
             // Find two vertices separated by at least 1/sqrt(3) of the maximum
             // distance between any two vertices
             int i = 0;
-            if (maxVal [1] - minVal [1] > maxVal [0] - minVal [0])
+            if ((double)maxVal [1] - minVal [1] > (double)maxVal [0] - minVal [0])
             {
                 i = 1;
             }
-            if (maxVal [2] - minVal [2] > maxVal [i] - minVal [i])
+            if ((double)maxVal [2] - minVal [2] > (double)maxVal [i] - minVal [i])
             {
                 i = 2;
             }
@@ -180,10 +180,10 @@ namespace SVGImporter.LibTessDotNet
             for (v = _mesh._vHead._next; v != _mesh._vHead; v = v._next)
             {
                 Vec3.Sub(ref v._coords, ref v2._coords, out d2);
-                tNorm.X = d1.Y * d2.Z - d1.Z * d2.Y;
-                tNorm.Y = d1.Z * d2.X - d1.X * d2.Z;
-                tNorm.Z = d1.X * d2.Y - d1.Y * d2.X;
-                tLen2 = tNorm.X * tNorm.X + tNorm.Y * tNorm.Y + tNorm.Z * tNorm.Z;
+                tNorm.X = (float)((double)d1.Y * d2.Z - (double)d1.Z * d2.Y);
+                tNorm.Y = (float)((double)d1.Z * d2.X - (double)d1.X * d2.Z);
+                tNorm.Z = (float)((double)d1.X * d2.Y - (double)d1.Y * d2.X);
+                tLen2 = (float)((double)tNorm.X * tNorm.X + (double)tNorm.Y * tNorm.Y + (double)tNorm.Z * tNorm.Z);
                 if (tLen2 > maxLen2)
                 {
                     maxLen2 = tLen2;
@@ -214,7 +214,7 @@ namespace SVGImporter.LibTessDotNet
                 }
                 do
                 {
-                    area += (e._Org._s - e._Dst._s) * (e._Org._t + e._Dst._t);
+                    area = (float)(area + ((double)e._Org._s - e._Dst._s) * ((double)e._Org._t + e._Dst._t));
                     e = e._Lnext;
                 } while (e != f._anEdge);
             }
@@ -629,8 +629,8 @@ namespace SVGImporter.LibTessDotNet
                 var v0 = vertices [i];
                 var v1 = vertices [(i + 1) % vertices.Length];
 
-                area += v0.Position.X * v1.Position.Y;
-                area -= v0.Position.Y * v1.Position.X;
+                area = (float)(area + (double)v0.Position.X * v1.Position.Y);
+                area = (float)(area - (double)v0.Position.Y * v1.Position.X);
             }
 
             return area * 0.5f;

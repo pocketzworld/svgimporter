@@ -1,3 +1,7 @@
+Version 1.1.6-h4k.4
+Release Date: 13 November 2026
+- Changed, mesh building keeps float intermediates in double as Mono does (matrices, arcs, Bezier flattening, path simplification, tessellation predicates): the same meshes in Unity, and byte-identical ones when the importer runs on .NET (Spindle, no Unity)
+
 Version 1.1.6-h4k.2
 Release Date: 12 November 2026
 - Fixed, a gradient fill drawn white on a compressed mesh: the runtime mesh rounds the stored gradient index instead of flooring it (index 1 decoded as 0.999997)

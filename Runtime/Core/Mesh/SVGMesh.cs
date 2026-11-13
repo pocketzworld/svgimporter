@@ -260,8 +260,8 @@ namespace SVGImporter.Geometry
                                     uvPoint.x = vertices [currentVertex].x;
                                     uvPoint.y = vertices [currentVertex].y;
                                     uvPoint = svgFillTransform.Transform(uvPoint);
-                                    uv[currentVertex].x = (uvPoint.x - viewport.x) / viewport.width;
-                                    uv[currentVertex].y = (uvPoint.y - viewport.y) / viewport.height;
+                                    uv[currentVertex].x = (float)(((double)uvPoint.x - viewport.x) / viewport.width);
+                                    uv[currentVertex].y = (float)(((double)uvPoint.y - viewport.y) / viewport.height);
                                     uv2[currentVertex] = uv2Value;
                                     normals[currentVertex].x = layers[i].shapes[j].angles[k].x;
                                     normals[currentVertex].y = layers[i].shapes[j].angles[k].y;
@@ -273,8 +273,8 @@ namespace SVGImporter.Geometry
                                     uvPoint.x = vertices [currentVertex].x;
                                     uvPoint.y = vertices [currentVertex].y;
                                     uvPoint = svgFillTransform.Transform(uvPoint);
-                                    uv[currentVertex].x = (uvPoint.x - viewport.x) / viewport.width;
-                                    uv[currentVertex].y = (uvPoint.y - viewport.y) / viewport.height;
+                                    uv[currentVertex].x = (float)(((double)uvPoint.x - viewport.x) / viewport.width);
+                                    uv[currentVertex].y = (float)(((double)uvPoint.y - viewport.y) / viewport.height);
                                     uv2[currentVertex] = uv2Value;
                                 }
                             }
