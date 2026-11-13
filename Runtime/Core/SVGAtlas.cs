@@ -74,6 +74,12 @@ namespace SVGImporter
 
         public CCGradient AddGradient(CCGradient gradient, out bool gradientExist)
         {
+            return AddGradient(gradient, gradient == null || !gradient.initialised ? null : gradient.hash, out gradientExist);
+        }
+
+        // AddGradient with the gradient's hash already read (it is a new string at each read).
+        public CCGradient AddGradient(CCGradient gradient, string gradientHash, out bool gradientExist)
+        {
             gradientExist = false;
             if (gradient == null || !gradient.initialised)
                 return null;
@@ -81,7 +87,6 @@ namespace SVGImporter
             if (gradientCache == null || gradientCache.Count == 0)
                 RebuildGradientCache ();
 
-            string gradientHash = gradient.hash;
             if (gradientCache.ContainsKey (gradientHash)) {          
                 gradient = gradientCache [gradientHash];
                 gradientExist = true;
@@ -131,10 +136,15 @@ namespace SVGImporter
         
         public CCGradient GetGradient (CCGradient gradient)
         {
+            return GetGradient(gradient, gradient == null || !gradient.initialised ? null : gradient.hash);
+        }
+
+        // GetGradient with the gradient's hash already read (it is a new string at each read).
+        public CCGradient GetGradient (CCGradient gradient, string gradientHash)
+        {
             if (gradient == null || !gradient.initialised || gradientCache == null)
                 return null;
 
-            string gradientHash = gradient.hash;
             if (gradientCache.ContainsKey (gradientHash)) {
                 return gradientCache [gradientHash];
             } else {
@@ -653,6 +663,13 @@ namespace SVGImporter
 
         public CCGradient AddGradient(CCGradient gradient)
         {
+            return AddGradient(gradient, gradient == null || !gradient.initialised ? null : gradient.hash);
+        }
+
+        // AddGradient with the gradient's hash already read (SVGAsset.AddReference: it is a new
+        // string at each read, sc-322737).
+        public CCGradient AddGradient(CCGradient gradient, string gradientHash)
+        {
             if (gradient == null || !gradient.initialised)
                 return null;
 
@@ -662,7 +679,7 @@ namespace SVGImporter
                 _atlasData.Init(atlasTextureWidth * atlasTextureHeight);
             }
             bool gradientExist;
-            gradient = _atlasData.AddGradient(gradient, out gradientExist);
+            gradient = _atlasData.AddGradient(gradient, gradientHash, out gradientExist);
             if(gradientExist) return gradient;
 
             int x = 0, y = 0;
@@ -692,11 +709,17 @@ namespace SVGImporter
 
         public CCGradient GetGradient(CCGradient gradient)
         {
+            return GetGradient(gradient, gradient == null || !gradient.initialised ? null : gradient.hash);
+        }
+
+        // GetGradient with the gradient's hash already read (SVGAsset.AddReference, sc-322737).
+        public CCGradient GetGradient(CCGradient gradient, string gradientHash)
+        {
             if (gradient == null || !gradient.initialised)
                 return null;
             
             if(_atlasData == null) return null;
-            return _atlasData.GetGradient(gradient);
+            return _atlasData.GetGradient(gradient, gradientHash);
         }
 
         public bool HasGradient(CCGradient gradient)

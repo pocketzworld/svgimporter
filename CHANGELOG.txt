@@ -1,3 +1,7 @@
+Version 1.1.6-h4k.3
+Release Date: 13 November 2026
+- Improved, an SVGImage's wake-up reads its gradients' hashes once: it no longer adds itself to its asset's gradients a second time (a no-op that read every hash again), and SVGAsset.AddReference builds each gradient's hash once for the atlas's look-up and add
+
 Version 1.1.6-h4k.2
 Release Date: 12 November 2026
 - Fixed, a gradient fill drawn white on a compressed mesh: the runtime mesh rounds the stored gradient index instead of flooring it (index 1 decoded as 0.999997)
