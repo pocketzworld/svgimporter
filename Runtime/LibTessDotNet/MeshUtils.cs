@@ -81,12 +81,12 @@ namespace SVGImporter.LibTessDotNet
 
         public static void Dot(ref Vec3 u, ref Vec3 v, out float dot)
         {
-            dot = u.X * v.X + u.Y * v.Y + u.Z * v.Z;
+            dot = (float)((double)u.X * v.X + (double)u.Y * v.Y + (double)u.Z * v.Z);
         }
 
         public static void Normalize(ref Vec3 v)
         {
-            float len = v.X * v.X + v.Y * v.Y + v.Z * v.Z;
+            float len = (float)((double)v.X * v.X + (double)v.Y * v.Y + (double)v.Z * v.Z);
             Debug.Assert(len >= 0.0f);
             len = 1.0f / (float)Math.Sqrt(len);
             v.X *= len;

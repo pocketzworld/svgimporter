@@ -596,7 +596,7 @@ namespace SVGImporter.Rendering
             { 
                 point.x = posX.value; 
             } else { 
-                point.x = bounds.x + bounds.width * (posX.value / 100f); 
+                point.x = (float)(bounds.x + bounds.width * ((double)posX.value / 100f)); 
             }
 
             if(posY.unitType != SVGLengthType.Percentage) 
@@ -604,7 +604,7 @@ namespace SVGImporter.Rendering
                 point.y = posY.value; 
             } else 
             { 
-                point.y = bounds.y + bounds.height * (posY.value / 100f); 
+                point.y = (float)(bounds.y + bounds.height * ((double)posY.value / 100f)); 
             }
 
             return point;
@@ -637,9 +637,9 @@ namespace SVGImporter.Rendering
                         Vector2 normalizedVector = Vector2.zero;
 
                         float angle = Mathf.Atan2(gradientVector.y, gradientVector.x) * Mathf.Rad2Deg;
-                        Vector2 posDiff = Vector2.Lerp(startPoint, endPoint, 0.5f);
+                        Vector2 posDiff = new Vector2((float)(startPoint.x + ((double)endPoint.x - startPoint.x) * 0.5), (float)(startPoint.y + ((double)endPoint.y - startPoint.y) * 0.5));
 
-                        float magnitude = gradientVector.magnitude;
+                        float magnitude = (float)System.Math.Sqrt((double)gradientVector.x * gradientVector.x + (double)gradientVector.y * gradientVector.y);
 
                         if(magnitude != 0f)
                         {
