@@ -471,12 +471,14 @@ namespace SVGImporter
                 for(int i = 0; i < _sharedGradients.Length; i++)
                 {
                     if(_sharedGradients[i] == null) continue;
-                    CCGradient gradient = SVGAtlas.Instance.GetGradient(_sharedGradients[i]);
+                    // The hash is a new string at every read: built once for both (sc-322737).
+                    string hash = _sharedGradients[i].hash;
+                    CCGradient gradient = SVGAtlas.Instance.GetGradient(_sharedGradients[i], hash);
                     if(gradient != null)
                     {
                         gradient.AddReference(reference);
                     } else {
-                        gradient = SVGAtlas.Instance.AddGradient(_sharedGradients[i].Clone());
+                        gradient = SVGAtlas.Instance.AddGradient(_sharedGradients[i].Clone(), hash);
                         gradient.AddReference(reference);
                     }
                 }
