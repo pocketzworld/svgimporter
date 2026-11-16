@@ -26,7 +26,7 @@ namespace SVGImporter.Utils
             List<IntPoint> polygonInt = new List<IntPoint>(polygonCount);
             for (i = 0; i < polygonCount; i++)
             {
-                polygonInt.Add(new IntPoint((int)(polygon [i].x * decimalPointInt), (int)(polygon [i].y * decimalPointInt)));
+                polygonInt.Add(new IntPoint((int)((double)polygon [i].x * decimalPointInt), (int)((double)polygon [i].y * decimalPointInt)));
             }
             return polygonInt;
         }

@@ -1,3 +1,7 @@
+Version 1.1.6-h4k.4
+Release Date: 13 November 2026
+- Changed, mesh building keeps float intermediates in double as Mono does (matrices, arcs, Bezier flattening, path simplification, tessellation predicates): the same meshes in Unity, and byte-identical ones when the importer runs on .NET (Spindle, no Unity)
+
 Version 1.1.6-h4k.3
 Release Date: 13 November 2026
 - Improved, an SVGImage's wake-up reads its gradients' hashes once: it no longer adds itself to its asset's gradients a second time (a no-op that read every hash again), and SVGAsset.AddReference builds each gradient's hash once for the atlas's look-up and add

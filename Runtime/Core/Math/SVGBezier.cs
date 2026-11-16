@@ -270,7 +270,7 @@ namespace SVGImporter.Rendering
 		private static float PointDistance(Vector2 point1, Vector2 point2) {
 			float dx = point1.x - point2.x;
 			float dy = point1.y - point2.y;
-			return (float)Mathf.Sqrt( dx*dx + dy*dy );
+			return (float)System.Math.Sqrt((float)((double)dx*dx + (double)dy*dy));
 		}
 
 		private static float AngularCoefficient(Vector2 point1, Vector2 point2) {
@@ -282,7 +282,7 @@ namespace SVGImporter.Rendering
 		}
 
 		private static float YIntercept(Vector2 point, float angularCoef) {
-			return (point.y - (angularCoef*point.x));
+			return (float)(point.y - ((double)angularCoef*point.x));
 		}
 
         private static float PerpendicularDistance(Vector2 point, Vector2 lineStartPoint, Vector2 lineEndPoint) {
@@ -296,8 +296,8 @@ namespace SVGImporter.Rendering
                 float angCoef = AngularCoefficient(lineStartPoint, lineEndPoint);
                 float yInter = YIntercept(lineStartPoint, angCoef);
                 
-                d = Mathf.Abs((angCoef*point.x)-point.y+yInter);
-				denom = (float)Mathf.Sqrt((angCoef*angCoef)+1);
+                d = (float)System.Math.Abs(((double)angCoef*point.x)-point.y+yInter);
+				denom = (float)System.Math.Sqrt((float)((double)angCoef*angCoef+1));
 			}
 			
 			return (d/denom);
@@ -478,10 +478,10 @@ namespace SVGImporter.Rendering
             float dx = x4 - x1;
             float dy = y4 - y1;
             
-            float d2 = Mathf.Abs(((x2 - x4) * dy - (y2 - y4) * dx));
-            float d3 = Mathf.Abs(((x3 - x4) * dy - (y3 - y4) * dx));
+            float d2 = (float)System.Math.Abs((((double)x2 - x4) * dy - ((double)y2 - y4) * dx));
+            float d3 = (float)System.Math.Abs((((double)x3 - x4) * dy - ((double)y3 - y4) * dx));
             
-            if ((d2 + d3) * (d2 + d3) < distanceTolerance * (dx * dx + dy * dy))
+            if (((double)d2 + d3) * ((double)d2 + d3) < distanceTolerance * ((double)dx * dx + (double)dy * dy))
             {
                 points.Add(new Vector2(x1234, y1234));
                 return;

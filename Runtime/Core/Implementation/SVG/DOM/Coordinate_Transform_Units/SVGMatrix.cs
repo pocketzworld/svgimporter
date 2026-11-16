@@ -43,7 +43,7 @@ namespace SVGImporter.Rendering
         public Vector2 scale
         {
             get {
-                return new Vector2(Mathf.Sqrt(a * a + b * b), Mathf.Sqrt(c * c + d * d));
+                return new Vector2(Mathf.Sqrt((float)((double)a * a + (double)b * b)), Mathf.Sqrt((float)((double)c * c + (double)d * d)));
             }
         }
 
@@ -72,8 +72,8 @@ namespace SVGImporter.Rendering
 
         Vector2 DeltaTransformPoint(Vector2 point)
         {
-            return new Vector2(point.x * a + point.y * c,
-                        point.x * b + point.y * d);
+            return new Vector2((float)((double)point.x * a + (double)point.y * c),
+                        (float)((double)point.x * b + (double)point.y * d));
         }
 
         //---------------------------------------
@@ -86,28 +86,28 @@ namespace SVGImporter.Rendering
             sd = secondMatrix.d;
             se = secondMatrix.e;
             sf = secondMatrix.f;
-            return new SVGMatrix(a * sa + c * sb, b * sa + d * sb,
-                               a * sc + c * sd, b * sc + d * sd,
-                               a * se + c * sf + e, b * se + d * sf + f);
+            return new SVGMatrix((float)((double)a * sa + (double)c * sb), (float)((double)b * sa + (double)d * sb),
+                               (float)((double)a * sc + (double)c * sd), (float)((double)b * sc + (double)d * sd),
+                               (float)((double)a * se + (double)c * sf + e), (float)((double)b * se + (double)d * sf + f));
         }
 
         public static SVGMatrix operator*(SVGMatrix left, SVGMatrix right) 
         {
-            return new SVGMatrix(left.a * right.a + left.c * right.b, left.b * right.a + left.d * right.b,
-                                 left.a * right.c + left.c * right.d, left.b * right.c + left.d * right.d,
-                                 left.a * right.e + left.c * right.f + left.e, left.b * right.e + left.d * right.f + left.f);
+            return new SVGMatrix((float)((double)left.a * right.a + (double)left.c * right.b), (float)((double)left.b * right.a + (double)left.d * right.b),
+                                 (float)((double)left.a * right.c + (double)left.c * right.d), (float)((double)left.b * right.c + (double)left.d * right.d),
+                                 (float)((double)left.a * right.e + (double)left.c * right.f + left.e), (float)((double)left.b * right.e + (double)left.d * right.f + left.f));
         }
 
         public SVGMatrix Inverse()
         {
-            double det = a * d - c * b;
+            double det = (double)a * d - (double)c * b;
             if (det == 0.0)
             {
                 throw new SVGException(SVGExceptionType.MatrixNotInvertable);
             }
             return new SVGMatrix((float)(d / det), (float)(-b / det),
                                (float)(-c / det), (float)(a / det),
-                               (float)((c * f - e * d) / det), (float)((e * b - a * f) / det));
+                               (float)(((double)c * f - (double)e * d) / det), (float)(((double)e * b - (double)a * f) / det));
         }
 
         public SVGMatrix Scale(float scaleFactor)
@@ -136,8 +136,8 @@ namespace SVGImporter.Rendering
             float ca = Mathf.Cos(angle * Mathf.Deg2Rad);
             float sa = Mathf.Sin(angle * Mathf.Deg2Rad);
 
-            return new SVGMatrix((float)(a * ca + c * sa), (float)(b * ca + d * sa),
-                               (float)(c * ca - a * sa), (float)(d * ca - b * sa),
+            return new SVGMatrix((float)((double)a * ca + (double)c * sa), (float)((double)b * ca + (double)d * sa),
+                               (float)((double)c * ca - (double)a * sa), (float)((double)d * ca - (double)b * sa),
                                e, f);
         }
 
@@ -145,40 +145,40 @@ namespace SVGImporter.Rendering
         {
             return new SVGMatrix(a, b,
                                  c, d,
-                                 a * x + c * y + e, b * x + d * y + f);
+                                 (float)((double)a * x + (double)c * y + e), (float)((double)b * x + (double)d * y + f));
         }
 
         public SVGMatrix Translate(Vector2 position)
         {
             return new SVGMatrix(a, b,
                                  c, d,
-                                 a * position.x + c * position.y + e, b * position.x + d * position.y + f);
+                                 (float)((double)a * position.x + (double)c * position.y + e), (float)((double)b * position.x + (double)d * position.y + f));
         }
 
         public SVGMatrix SkewX(float angle)
         {
             float ta = Mathf.Tan(angle * Mathf.Deg2Rad);
             return new SVGMatrix(a, b,
-                               (float)(c + a * ta), (float)(d + b * ta),
+                               (float)(c + (double)a * ta), (float)(d + (double)b * ta),
                                e, f);
         }
 
         public SVGMatrix SkewY(float angle)
         {
             float ta = Mathf.Tan(angle * Mathf.Deg2Rad);
-            return new SVGMatrix((float)(a + c * ta), (float)(b + d * ta),
+            return new SVGMatrix((float)(a + (double)c * ta), (float)(b + (double)d * ta),
                                c, d,
                                e, f);
         }
 
         public Vector2 Transform(Vector2 point)
         {
-            return new Vector2(a * point.x + c * point.y + e, b * point.x + d * point.y + f);
+            return new Vector2((float)((double)a * point.x + (double)c * point.y + e), (float)((double)b * point.x + (double)d * point.y + f));
         }
 
         public Vector3 Transform(Vector3 point)
         {
-            return new Vector3(a * point.x + c * point.y + e, b * point.x + d * point.y + f, 0f);
+            return new Vector3((float)((double)a * point.x + (double)c * point.y + e), (float)((double)b * point.x + (double)d * point.y + f), 0f);
         }
 
         public static SVGMatrix TRS(Vector2 position, float rotation , Vector2 scale)
@@ -188,7 +188,7 @@ namespace SVGImporter.Rendering
             float sa = Mathf.Sin(rotation * Mathf.Deg2Rad);
             return new SVGMatrix((a * ca + c * sa) * scale.x, (b * ca + d * sa) * scale.x,
                                  (c * ca - a * sa) * scale.y, (d * ca - b * sa) * scale.y,
-                                 a * position.x + c * position.y + e, b * position.x + d * position.y + f);
+                                 (float)((double)a * position.x + (double)c * position.y + e), (float)((double)b * position.x + (double)d * position.y + f));
         }
 
         public Matrix4x4 ToMatrix4x4()

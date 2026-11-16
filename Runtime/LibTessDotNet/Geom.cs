@@ -57,7 +57,7 @@ namespace SVGImporter.LibTessDotNet
 
         public static bool VertCCW(MeshUtils.Vertex u, MeshUtils.Vertex v, MeshUtils.Vertex w)
         {
-            return (u._s * (v._t - w._t) + v._s * (w._t - u._t) + w._s * (u._t - v._t)) >= 0.0f;
+            return ((double)u._s * ((double)v._t - w._t) + (double)v._s * ((double)w._t - u._t) + (double)w._s * ((double)u._t - v._t)) >= 0.0;
         }
 
         public static bool VertEq(MeshUtils.Vertex lhs, MeshUtils.Vertex rhs)
@@ -88,14 +88,14 @@ namespace SVGImporter.LibTessDotNet
             float gapL = v._s - u._s;
             float gapR = w._s - v._s;
 
-            if (gapL + gapR > 0.0f)
+            if ((double)gapL + gapR > 0.0)
             {
                 if (gapL < gapR)
                 {
-                    return (v._t - u._t) + (u._t - w._t) * (gapL / (gapL + gapR));
+                    return (float)(((double)v._t - u._t) + ((double)u._t - w._t) * ((double)gapL / ((double)gapL + gapR)));
                 } else
                 {
-                    return (v._t - w._t) + (w._t - u._t) * (gapR / (gapL + gapR));
+                    return (float)(((double)v._t - w._t) + ((double)w._t - u._t) * ((double)gapR / ((double)gapL + gapR)));
                 }
             }
             /* vertical line */
@@ -114,9 +114,9 @@ namespace SVGImporter.LibTessDotNet
             float gapL = v._s - u._s;
             float gapR = w._s - v._s;
 
-            if (gapL + gapR > 0.0f)
+            if ((double)gapL + gapR > 0.0)
             {
-                return (v._t - w._t) * gapL + (v._t - u._t) * gapR;
+                return (float)(((double)v._t - w._t) * gapL + ((double)v._t - u._t) * gapR);
             }
             /* vertical line */
             return 0.0f;
@@ -136,14 +136,14 @@ namespace SVGImporter.LibTessDotNet
             float gapL = v._t - u._t;
             float gapR = w._t - v._t;
 
-            if (gapL + gapR > 0.0f)
+            if ((double)gapL + gapR > 0.0)
             {
                 if (gapL < gapR)
                 {
-                    return (v._s - u._s) + (u._s - w._s) * (gapL / (gapL + gapR));
+                    return (float)(((double)v._s - u._s) + ((double)u._s - w._s) * ((double)gapL / ((double)gapL + gapR)));
                 } else
                 {
-                    return (v._s - w._s) + (w._s - u._s) * (gapR / (gapL + gapR));
+                    return (float)(((double)v._s - w._s) + ((double)w._s - u._s) * ((double)gapR / ((double)gapL + gapR)));
                 }
             }
             /* vertical line */
@@ -157,9 +157,9 @@ namespace SVGImporter.LibTessDotNet
             float gapL = v._t - u._t;
             float gapR = w._t - v._t;
 
-            if (gapL + gapR > 0.0f)
+            if ((double)gapL + gapR > 0.0)
             {
-                return (v._s - w._s) * gapL + (v._s - u._s) * gapR;
+                return (float)(((double)v._s - w._s) * gapL + ((double)v._s - u._s) * gapR);
             }
             /* vertical line */
             return 0.0f;
@@ -192,9 +192,9 @@ namespace SVGImporter.LibTessDotNet
         {
             a = a < 0.0f ? 0.0f : a;
             b = b < 0.0f ? 0.0f : b;
-            return ((a <= b) ? ((b == 0.0f) ? ((x + y) / 2.0f)
-                    : (x + (y - x) * (a / (a + b))))
-                    : (y + (x - y) * (b / (a + b))));
+            return (float)((a <= b) ? ((b == 0.0f) ? (((double)x + y) / 2.0)
+                    : ((double)x + ((double)y - x) * ((double)a / ((double)a + b))))
+                    : ((double)y + ((double)x - y) * ((double)b / ((double)a + b))));
         }
 
         static void Swap(ref MeshUtils.Vertex a, ref MeshUtils.Vertex b)
@@ -237,13 +237,13 @@ namespace SVGImporter.LibTessDotNet
             if (!VertLeq(o2, d1))
             {
                 // Technically, no intersection -- do our best
-                v._s = (o2._s + d1._s) / 2.0f;
+                v._s = (float)(((double)o2._s + d1._s) / 2.0);
             } else if (VertLeq(d1, d2))
             {
                 // Interpolate between o2 and d1
                 z1 = EdgeEval(o1, o2, d1);
                 z2 = EdgeEval(o2, d1, d2);
-                if (z1 + z2 < 0.0f)
+                if ((double)z1 + z2 < 0.0)
                 {
                     z1 = -z1;
                     z2 = -z2;
@@ -254,7 +254,7 @@ namespace SVGImporter.LibTessDotNet
                 // Interpolate between o2 and d2
                 z1 = EdgeSign(o1, o2, d1);
                 z2 = -EdgeSign(o1, d2, d1);
-                if (z1 + z2 < 0.0f)
+                if ((double)z1 + z2 < 0.0)
                 {
                     z1 = -z1;
                     z2 = -z2;
@@ -281,13 +281,13 @@ namespace SVGImporter.LibTessDotNet
             if (!TransLeq(o2, d1))
             {
                 // Technically, no intersection -- do our best
-                v._t = (o2._t + d1._t) / 2.0f;
+                v._t = (float)(((double)o2._t + d1._t) / 2.0);
             } else if (TransLeq(d1, d2))
             {
                 // Interpolate between o2 and d1
                 z1 = TransEval(o1, o2, d1);
                 z2 = TransEval(o2, d1, d2);
-                if (z1 + z2 < 0.0f)
+                if ((double)z1 + z2 < 0.0)
                 {
                     z1 = -z1;
                     z2 = -z2;
@@ -298,7 +298,7 @@ namespace SVGImporter.LibTessDotNet
                 // Interpolate between o2 and d2
                 z1 = TransSign(o1, o2, d1);
                 z2 = -TransSign(o1, d2, d1);
-                if (z1 + z2 < 0.0f)
+                if ((double)z1 + z2 < 0.0)
                 {
                     z1 = -z1;
                     z2 = -z2;
