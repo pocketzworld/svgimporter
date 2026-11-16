@@ -1,3 +1,8 @@
+Version 1.1.6-h4k.5
+Release Date: 16 November 2026
+- Changed, a gradient's hash is made once and kept while its keys are the same arrays (it was a new string, built a key at a time, at every read: SVGImage's wake and destroy, the atlas's lookups)
+- Changed, once the gradient atlas has been rendered whole, a change renders only the gradients added since, into their places, and uploads the texture once; every gradient is rendered from one reused pixel buffer (a screen's images let their gradients go when it closes and add them again when it opens, and each time the whole atlas was rendered again, a new Color[] per gradient)
+
 Version 1.1.6-h4k.4
 Release Date: 13 November 2026
 - Changed, mesh building keeps float intermediates in double as Mono does (matrices, arcs, Bezier flattening, path simplification, tessellation predicates): the same meshes in Unity, and byte-identical ones when the importer runs on .NET (Spindle, no Unity)

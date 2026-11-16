@@ -48,8 +48,30 @@ namespace SVGImporter.Rendering
     	public CCGradientColorKey[] colorKeys;
     	public CCGradientAlphaKey[] alphaKeys;
     	
+        // The hash is made once and kept while the keys are the same arrays: SVGImage.Awake and
+        // OnDestroy, SVGAtlas.AddGradient and GetGradient ask it of every gradient every time,
+        // and it built a new string a key at a time (~0.8 MB of garbage per elevator open in
+        // Hotel Hideaway, sc-327259). The keys are set when a gradient is made (its constructor,
+        // the brushes, deserialization); a new array given to either field makes it again.
+        [System.NonSerialized] private string _hash;
+        [System.NonSerialized] private CCGradientColorKey[] _hashedColorKeys;
+        [System.NonSerialized] private CCGradientAlphaKey[] _hashedAlphaKeys;
+
     	public string hash {
     		get {
+                if (_hash == null || !ReferenceEquals(_hashedColorKeys, colorKeys) || !ReferenceEquals(_hashedAlphaKeys, alphaKeys))
+                {
+                    _hash = ComputeHash();
+                    _hashedColorKeys = colorKeys;
+                    _hashedAlphaKeys = alphaKeys;
+                }
+
+                return _hash;
+    		}
+    	}
+
+        private string ComputeHash()
+        {
                 string hash = "G";
                 
                 if (colorKeys != null && colorKeys.Length > 0) {
@@ -65,8 +87,7 @@ namespace SVGImporter.Rendering
                     }
                 }
                 return hash;
-    		}
-    	}
+        }
     	
     	public int index;
 
