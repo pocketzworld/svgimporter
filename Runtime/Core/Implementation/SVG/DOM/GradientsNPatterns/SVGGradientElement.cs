@@ -62,7 +62,10 @@ namespace SVGImporter.Rendering
             _stopList = new List<SVGStopElement>();
             _id = _attrList.GetValue("id");
             _gradientUnits = SVGGradientUnit.ObjectBoundingBox;
-            if (_attrList.GetValue("gradiantUnits") == "userSpaceOnUse")
+            // gradientUnits, read under its own name (it was looked up as "gradiantUnits", so every gradient was
+            // taken as user space). A gradient that refers to another by xlink:href has the other's attributes merged
+            // into its own first (SVGParser.ResolveGradientLinks), so it gets that gradient's units as SVG says.
+            if (_attrList.GetValue("gradientUnits") == "userSpaceOnUse")
             {
                 _gradientUnits = SVGGradientUnit.UserSpaceOnUse;
             }

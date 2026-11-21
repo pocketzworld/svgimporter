@@ -1,3 +1,7 @@
+Version 1.1.6-h4k.6
+Release Date: 21 November 2026
+- Fixed, gradients in objectBoundingBox units (SVG's default, when gradientUnits is not userSpaceOnUse) laid out over the shape's box: their 0..1 (or 0%..100%) numbers were read as user-space coordinates, so a linear gradient from y 0 to 1 drew the whole shape in its last stop's colour. gradientUnits is read under its own name (it was looked up as "gradiantUnits"), and a gradient linked by xlink:href takes the linked one's units. userSpaceOnUse gradients are unchanged
+
 Version 1.1.6-h4k.4
 Release Date: 13 November 2026
 - Changed, mesh building keeps float intermediates in double as Mono does (matrices, arcs, Bezier flattening, path simplification, tessellation predicates): the same meshes in Unity, and byte-identical ones when the importer runs on .NET (Spindle, no Unity)
