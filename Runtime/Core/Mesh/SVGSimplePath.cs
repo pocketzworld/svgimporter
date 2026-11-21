@@ -610,9 +610,93 @@ namespace SVGImporter.Rendering
             return point;
         }
 
-        //const float defaultViewportScale = 800f;
-        public static SVGMatrix GetFillTransform(SVGFill svgFill, Rect bounds, SVGLength[] gradientStart, SVGLength[] gradientEnd, SVGMatrix fillTransform, SVGMatrix gradientTransform)
+        // A length of a gradientUnits="objectBoundingBox" gradient as a fraction of the shape's box: 0.25 and 25% alike.
+        static float BoundingBoxFraction(SVGLength length)
         {
+            return length.unitType == SVGLengthType.Percentage ? (float)((double)length.value / 100f) : length.value;
+        }
+
+        // gradientUnits="objectBoundingBox", SVG's default (hand-written SVGs and many Figma and Inkscape exports use it;
+        // Illustrator writes userSpaceOnUse): the gradient's numbers are fractions of the shape's box, its
+        // gradientTransform applies in that unit square, and the square is then stretched over the box, so a radial
+        // gradient on a wide shape is an ellipse. Before, the numbers were read as user-space coordinates, so
+        // x1="0" y1="0" x2="0" y2="1" ran over one pixel and the shape was drawn in the last stop's colour.
+        // The box is the shape's own, before its transform: the bounds' corners taken back through the transform
+        // (exact for scale and translation, the box around a rotated shape otherwise).
+        static SVGMatrix GetBoundingBoxFillTransform(SVGFill svgFill, Rect bounds, SVGLength[] gradientStart, SVGLength[] gradientEnd, SVGMatrix fillTransform, SVGMatrix gradientTransform)
+        {
+            SVGMatrix inverseFill = fillTransform.Inverse();
+            Vector2 p0 = inverseFill.Transform(new Vector2(bounds.xMin, bounds.yMin));
+            Vector2 p1 = inverseFill.Transform(new Vector2(bounds.xMax, bounds.yMin));
+            Vector2 p2 = inverseFill.Transform(new Vector2(bounds.xMin, bounds.yMax));
+            Vector2 p3 = inverseFill.Transform(new Vector2(bounds.xMax, bounds.yMax));
+            Vector2 min = Vector2.Min(Vector2.Min(p0, p1), Vector2.Min(p2, p3));
+            Vector2 max = Vector2.Max(Vector2.Max(p0, p1), Vector2.Max(p2, p3));
+            float width = max.x - min.x;
+            float height = max.y - min.y;
+            // A box with no width or height has no unit square: SVG draws nothing there, here the gradient is
+            // kept finite along that side instead of dividing by zero.
+            if (width == 0f) width = 1f;
+            if (height == 0f) height = 1f;
+            SVGMatrix toUnitSquare = SVGMatrix.identity.Scale(1f / width, 1f / height).Translate(-min.x, -min.y);
+
+            Rect viewport = svgFill.viewport;
+            SVGMatrix transform = SVGMatrix.identity;
+            switch (svgFill.gradientType)
+            {
+                case GRADIENT_TYPE.LINEAR:
+                {
+                    Vector2 startPoint = new Vector2(BoundingBoxFraction(gradientStart[0]), BoundingBoxFraction(gradientStart[1]));
+                    Vector2 endPoint = new Vector2(BoundingBoxFraction(gradientEnd[0]), BoundingBoxFraction(gradientEnd[1]));
+                    Vector2 gradientVector = endPoint - startPoint;
+                    Vector2 normalizedVector = Vector2.zero;
+                    float angle = Mathf.Atan2(gradientVector.y, gradientVector.x) * Mathf.Rad2Deg;
+                    // In double where Mono computes in double, as the user-space path does (1.1.6-h4k.4).
+                    Vector2 posDiff = new Vector2((float)(startPoint.x + ((double)endPoint.x - startPoint.x) * 0.5), (float)(startPoint.y + ((double)endPoint.y - startPoint.y) * 0.5));
+                    float magnitude = (float)System.Math.Sqrt((double)gradientVector.x * gradientVector.x + (double)gradientVector.y * gradientVector.y);
+                    if (magnitude != 0f)
+                    {
+                        normalizedVector.x = viewport.width / magnitude;
+                        normalizedVector.y = viewport.height / magnitude;
+                    }
+                    transform = transform.Translate(viewport.center);
+                    transform = transform.Scale(normalizedVector.x, normalizedVector.y);
+                    transform = transform.Rotate(-angle);
+                    transform = transform.Translate(-posDiff);
+                    break;
+                }
+                case GRADIENT_TYPE.RADIAL:
+                case GRADIENT_TYPE.CONICAL:
+                {
+                    Vector2 point = new Vector2(BoundingBoxFraction(gradientStart[0]), BoundingBoxFraction(gradientStart[1]));
+                    float radiusTimesTwo = BoundingBoxFraction(gradientEnd[0]) * 2f;
+                    Vector2 normalizedVector = Vector2.zero;
+                    if (radiusTimesTwo != 0f)
+                    {
+                        normalizedVector.x = viewport.width / radiusTimesTwo;
+                        normalizedVector.y = viewport.height / radiusTimesTwo;
+                    }
+                    transform = transform.Translate(viewport.center);
+                    transform = transform.Scale(normalizedVector.x, normalizedVector.y);
+                    transform = transform.Translate(-point);
+                    break;
+                }
+            }
+
+            transform = transform.Multiply(gradientTransform.Inverse());
+            transform = transform.Multiply(toUnitSquare);
+            transform = transform.Multiply(inverseFill);
+            return transform;
+        }
+
+        //const float defaultViewportScale = 800f;
+        public static SVGMatrix GetFillTransform(SVGFill svgFill, Rect bounds, SVGLength[] gradientStart, SVGLength[] gradientEnd, SVGMatrix fillTransform, SVGMatrix gradientTransform, bool objectBoundingBox = false)
+        {
+            if (objectBoundingBox && svgFill.fillType == FILL_TYPE.GRADIENT)
+            {
+                return GetBoundingBoxFillTransform(svgFill, bounds, gradientStart, gradientEnd, fillTransform, gradientTransform);
+            }
+
             SVGMatrix transform = SVGMatrix.identity;
 
             SVGLength gradientStartX = gradientStart[0];
