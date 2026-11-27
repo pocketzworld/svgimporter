@@ -442,7 +442,8 @@ namespace SVGImporter
 
             if (_atlasHasChanged)
             {
-                RebuildAtlas();
+                if (_renderedWhole && atlasTextures != null && atlasTextures.Count > 0 && atlasTextures[0] != null) RenderAdded();
+                else RebuildAtlas();
                 _atlasHasChanged = false;
                 UpdateMaterialList();
             }
@@ -576,6 +577,7 @@ namespace SVGImporter
     	}
     	
         const int pixelOffset = 1;
+        private static Color[] s_gradientPixels;
         public static void RenderGradient (Texture2D texture, CCGradient gradient, int x, int y, int gradientWidth, int gradientHeight)
         {
             //Debug.Log(string.Format("x: {0}, y: {1}, gradient: {2}", x, y, gradient));
@@ -583,7 +585,9 @@ namespace SVGImporter
                 return;
             
             float tempWidth = gradientWidth - 1 - pixelOffset * 2;
-            Color[] pixels = new Color[gradientWidth * gradientHeight];
+            // One buffer for every gradient rendered (a new Color[] each, sc-327259).
+            if (s_gradientPixels == null || s_gradientPixels.Length != gradientWidth * gradientHeight) s_gradientPixels = new Color[gradientWidth * gradientHeight];
+            Color[] pixels = s_gradientPixels;
             
             Color pixel;
             
@@ -630,7 +634,8 @@ namespace SVGImporter
             if (atlasTextures == null)
                 atlasTextures = new List<Texture2D> ();
 
-			Texture2D texture = CreateTexture(width, height);            
+			Texture2D texture = CreateTexture(width, height);
+            _renderedWhole = false;
             texture.hideFlags = HideFlags.DontSave;
             texture.name = "Atlas "+index.ToString();
 
@@ -688,6 +693,7 @@ namespace SVGImporter
 //            Debug.Log("AddGradient: x: "+x+", y: "+y);
             gradient.atlasIndex = atlasIndex;
             _atlasHasChanged = true;
+            _added.Add(gradient);
 
             return  gradient;
         }
@@ -731,6 +737,30 @@ namespace SVGImporter
             return _atlasData.HasGradient(gradient);;
         }
 
+        // The gradients added since the atlas was last rendered, and whether it has been rendered
+        // whole: once it has, a change renders the added gradients alone into their places, where
+        // RebuildAtlas rendered every gradient of it again, a Color[] each, at every change (the
+        // gradients of a closed screen's images go and come back as it opens again; ~1.1 MB of
+        // garbage per elevator open in Hotel Hideaway, sc-327259). A place freed and taken again
+        // is the new gradient's, which is among the added.
+        [System.NonSerialized] private readonly List<CCGradient> _added = new List<CCGradient>();
+        [System.NonSerialized] private bool _renderedWhole;
+
+        private void RenderAdded()
+        {
+            CCGradient[] gradients = _atlasData != null ? _atlasData.gradients : null;
+            int x, y;
+            for (int i = 0; i < _added.Count; i++) {
+                CCGradient gradient = _added[i];
+                if (gradients == null || gradient == null || gradient.index < 0 || gradient.index >= gradients.Length || !ReferenceEquals(gradients[gradient.index], gradient)) continue;
+                GetCoords (out x, out y, gradient.index);
+                RenderGradient (atlasTextures [atlasIndex], gradient, x, y, gradientWidth, gradientHeight);
+            }
+
+            _added.Clear();
+            atlasTextures [atlasIndex].Apply (false);
+        }
+
         public void RebuildAtlas ()
         {
 //            long timeStart = System.DateTime.Now.Ticks;
@@ -758,6 +788,9 @@ namespace SVGImporter
             for (int i = 0; i < atlasTextures.Count; i++) {
                 atlasTextures [i].Apply (false);
             }
+
+            _added.Clear();
+            _renderedWhole = atlasTextures.Count > 0;
 
 //            Debug.Log("RebuildAtlas");
             //Debug.Log("RebuildAtlas took: "+System.TimeSpan.FromTicks(System.DateTime.Now.Ticks - timeStart).Milliseconds+" ms");
