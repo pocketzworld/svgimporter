@@ -108,7 +108,7 @@ namespace SVGImporter.Rendering
         private void CreateFill(Rect bounds)
         {        
             CreateFill();
-            _fill.transform = SVGSimplePath.GetFillTransform(_fill, bounds, new SVGLength[]{_cx, _cy}, new SVGLength[]{_r, _r}, _transform, _gradientTransform);
+            _fill.transform = SVGSimplePath.GetFillTransform(_fill, bounds, new SVGLength[]{_cx, _cy}, new SVGLength[]{_r, _r}, _transform, _gradientTransform, _radialGradElement.gradientUnits == SVGGradientUnit.ObjectBoundingBox);
         }
         
         public CCGradient ParseGradientColors()
